@@ -37,8 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copia variables de entorno y el código del proyecto
-COPY .env /app/.env
+# Copia el código del proyecto (las variables se pasan por el entorno)
 COPY portafolio/ .
 
 # Crea los directorios necesarios
