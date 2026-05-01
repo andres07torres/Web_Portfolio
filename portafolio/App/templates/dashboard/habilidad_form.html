@@ -1,0 +1,334 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}{{ titulo_form }} Habilidad{% endblock %}
+{% block page_title %}{{ titulo_form }} Habilidad{% endblock %}
+{% block breadcrumb %}Contenido → Habilidades → {{ titulo_form }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.icon-picker-wrap {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.icon-picker-search {
+    background: rgba(255,255,255,0.04);
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    color: #fff;
+    padding: .6rem 1rem;
+    width: 100%;
+    font-size: .85rem;
+    outline: none;
+}
+.icon-picker-search::placeholder { color: rgba(255,255,255,0.3); }
+.icon-picker-cats {
+    display: flex;
+    gap: 6px;
+    padding: .6rem 1rem;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-wrap: wrap;
+}
+.cat-btn {
+    font-size: .7rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    background: transparent;
+    cursor: pointer;
+    transition: all .2s;
+}
+.cat-btn:hover, .cat-btn.active {
+    background: rgba(0,212,255,0.12);
+    border-color: rgba(0,212,255,0.3);
+    color: #00d4ff;
+}
+.icon-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: 4px;
+    padding: .75rem;
+    max-height: 280px;
+    overflow-y: auto;
+    background: rgba(8,8,8,0.6);
+}
+.icon-picker-grid::-webkit-scrollbar { width: 4px; }
+.icon-picker-grid::-webkit-scrollbar-track { background: transparent; }
+.icon-picker-grid::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.3); border-radius: 2px; }
+
+.icon-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .15s;
+    background: transparent;
+}
+.icon-item i { font-size: 1.3rem; color: rgba(255,255,255,0.7); }
+.icon-item:hover { background: rgba(0,212,255,0.07); border-color: rgba(0,212,255,0.2); }
+.icon-item:hover i { color: #00d4ff; }
+.icon-item.selected { background: rgba(0,212,255,0.12); border-color: #00d4ff; }
+.icon-item.selected i { color: #00d4ff; }
+/* Devicons con colored usan fills SVG → íconos normales */
+.icon-item i[class*="devicon-"] { color: rgba(255,255,255,0.75); }
+/* Devicons sin colored (plain) que puedan aparecer negro → forzar blanco */
+.icon-item i[class*="devicon-"]:not([class*="colored"]) {
+    filter: brightness(0) invert(0.8);
+}
+.icon-item:hover i[class*="devicon-"] { filter: brightness(1.15); }
+.icon-item.selected i[class*="devicon-"] { filter: brightness(1.2); }
+
+.icon-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 8px;
+    padding: .5rem 1rem;
+    font-size: .9rem;
+    color: #00d4ff;
+    font-weight: 600;
+}
+.icon-preview-badge i { font-size: 1.3rem; }
+
+.no-icons { text-align: center; color: rgba(255,255,255,0.25); padding: 2rem; font-size: .82rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="form-card mx-auto" style="max-width: 620px;">
+    <form method="post" id="habilidadForm">
+        {% csrf_token %}
+
+        {# nombre se auto-rellena desde el ícono seleccionado #}
+        <input type="hidden" name="nombre" id="nombreInput" value="{{ form.nombre.value|default:'' }}" required>
+
+        <div class="mb-4">
+            <label class="form-label">Ícono <span class="text-accent">*</span></label>
+
+            <!-- Preview seleccionado -->
+            <div id="iconPreviewBox" class="mb-3" style="{% if not form.icono_class.value %}display:none{% endif %}">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-preview-badge">
+                        <i class="{{ form.icono_class.value|default:'' }}" id="previewIcon"></i>
+                        <span id="previewName">{{ form.nombre.value|default:'Selecciona un ícono' }}</span>
+                    </div>
+                    <button type="button" onclick="clearIcon()" class="btn-ghost" style="font-size:.75rem;padding:.3rem .7rem;">
+                        <i class="bi bi-x me-1"></i> Cambiar
+                    </button>
+                </div>
+            </div>
+
+            <input type="hidden" name="icono_class" id="iconoInput" value="{{ form.icono_class.value|default:'' }}">
+
+            <!-- Picker -->
+            <div class="icon-picker-wrap" id="iconPicker">
+                <input type="text" class="icon-picker-search" id="iconSearch" placeholder="🔍  Buscar ícono..." oninput="filterIcons()">
+                <div class="icon-picker-cats" id="catFilters">
+                    <button class="cat-btn active" onclick="filterCat('todos', this)" type="button">Todos</button>
+                    <button class="cat-btn" onclick="filterCat('lenguajes', this)" type="button">Lenguajes</button>
+                    <button class="cat-btn" onclick="filterCat('frameworks', this)" type="button">Frameworks</button>
+                    <button class="cat-btn" onclick="filterCat('bases-de-datos', this)" type="button">Bases de datos</button>
+                    <button class="cat-btn" onclick="filterCat('herramientas', this)" type="button">Herramientas</button>
+                    <button class="cat-btn" onclick="filterCat('cloud', this)" type="button">Cloud / DevOps</button>
+                    <button class="cat-btn" onclick="filterCat('general', this)" type="button">General</button>
+                </div>
+                <div class="icon-picker-grid" id="iconGrid"></div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Orden de aparición</label>
+            <input type="number" name="orden" class="form-control" placeholder="1" value="{{ form.orden.value|default:'0' }}" min="0">
+        </div>
+
+        <div class="d-flex modal-footer-custom align-items-center justify-content-center gap-2 pt-3" style="border-top:1px solid rgba(255,255,255,0.06);">
+            <button type="submit" class="btn-accent">Guardar</button>
+            <a href="{% url 'dashboard_habilidades' %}" class="btn-warning-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Catálogo de íconos por categoría ─────────────────────────────────
+const ICONS = [
+    // Lenguajes de programación (Devicons)
+    { class: 'devicon-python-plain colored',      label: 'Python',      cat: 'lenguajes' },
+    { class: 'devicon-javascript-plain colored',  label: 'JavaScript',  cat: 'lenguajes' },
+    { class: 'devicon-typescript-plain colored',  label: 'TypeScript',  cat: 'lenguajes' },
+    { class: 'devicon-java-plain colored',        label: 'Java',        cat: 'lenguajes' },
+    { class: 'devicon-csharp-plain colored',      label: 'C#',          cat: 'lenguajes' },
+    { class: 'devicon-cplusplus-plain colored',   label: 'C++',         cat: 'lenguajes' },
+    { class: 'devicon-c-plain colored',           label: 'C',           cat: 'lenguajes' },
+    { class: 'devicon-go-plain colored',          label: 'Go',          cat: 'lenguajes' },
+    { class: 'devicon-ruby-plain colored',        label: 'Ruby',        cat: 'lenguajes' },
+    { class: 'devicon-php-plain colored',         label: 'PHP',         cat: 'lenguajes' },
+    { class: 'devicon-rust-plain colored',        label: 'Rust',        cat: 'lenguajes' },
+    { class: 'devicon-kotlin-plain colored',      label: 'Kotlin',      cat: 'lenguajes' },
+    { class: 'devicon-swift-plain colored',       label: 'Swift',       cat: 'lenguajes' },
+    { class: 'devicon-html5-plain colored',       label: 'HTML5',       cat: 'lenguajes' },
+    { class: 'devicon-css3-plain colored',        label: 'CSS3',        cat: 'lenguajes' },
+    { class: 'devicon-scala-plain colored',       label: 'Scala',       cat: 'lenguajes' },
+    { class: 'devicon-r-plain colored',           label: 'R',           cat: 'lenguajes' },
+    { class: 'devicon-bash-plain colored',        label: 'Bash',        cat: 'lenguajes' },
+    { class: 'devicon-lua-plain colored',         label: 'Lua',         cat: 'lenguajes' },
+
+    // Frameworks & Librerías
+    { class: 'devicon-django-plain colored',         label: 'Django',      cat: 'frameworks' },
+    { class: 'devicon-fastapi-plain colored',         label: 'FastAPI',     cat: 'frameworks' },
+    { class: 'devicon-flask-original',               label: 'Flask',       cat: 'frameworks' },
+    { class: 'devicon-react-original colored',        label: 'React',       cat: 'frameworks' },
+    { class: 'devicon-vuejs-plain colored',           label: 'Vue.js',      cat: 'frameworks' },
+    { class: 'devicon-angularjs-plain colored',       label: 'Angular',     cat: 'frameworks' },
+    { class: 'devicon-nextjs-plain',                  label: 'Next.js',     cat: 'frameworks' },
+    { class: 'devicon-nodejs-plain colored',          label: 'Node.js',     cat: 'frameworks' },
+    { class: 'devicon-express-original',              label: 'Express',     cat: 'frameworks' },
+    { class: 'devicon-bootstrap-plain colored',       label: 'Bootstrap',   cat: 'frameworks' },
+    { class: 'devicon-tailwindcss-plain colored',     label: 'Tailwind',    cat: 'frameworks' },
+    { class: 'devicon-spring-plain colored',          label: 'Spring',      cat: 'frameworks' },
+    { class: 'devicon-laravel-plain colored',         label: 'Laravel',     cat: 'frameworks' },
+    { class: 'devicon-tensorflow-original colored',   label: 'TensorFlow',  cat: 'frameworks' },
+    { class: 'devicon-pytorch-plain colored',         label: 'PyTorch',     cat: 'frameworks' },
+    { class: 'bi bi-bar-chart-fill',                  label: 'Pandas',      cat: 'frameworks' },
+    { class: 'devicon-numpy-plain colored',           label: 'NumPy',       cat: 'frameworks' },
+
+    // Bases de datos
+    { class: 'devicon-postgresql-plain colored',   label: 'PostgreSQL',  cat: 'bases-de-datos' },
+    { class: 'devicon-mysql-plain colored',        label: 'MySQL',       cat: 'bases-de-datos' },
+    { class: 'devicon-mongodb-plain colored',      label: 'MongoDB',     cat: 'bases-de-datos' },
+    { class: 'devicon-redis-plain colored',        label: 'Redis',       cat: 'bases-de-datos' },
+    { class: 'devicon-sqlite-plain colored',       label: 'SQLite',      cat: 'bases-de-datos' },
+    { class: 'devicon-microsoftsqlserver-plain colored', label: 'SQL Server', cat: 'bases-de-datos' },
+    { class: 'devicon-oracle-original colored',    label: 'Oracle DB',   cat: 'bases-de-datos' },
+    { class: 'devicon-firebase-plain colored',     label: 'Firebase',    cat: 'bases-de-datos' },
+    { class: 'devicon-cassandra-plain colored',    label: 'Cassandra',   cat: 'bases-de-datos' },
+
+    // Herramientas
+    { class: 'devicon-git-plain colored',          label: 'Git',         cat: 'herramientas' },
+    { class: 'devicon-github-original',             label: 'GitHub',      cat: 'herramientas' },
+    { class: 'devicon-gitlab-plain colored',        label: 'GitLab',      cat: 'herramientas' },
+    { class: 'devicon-docker-plain colored',        label: 'Docker',      cat: 'herramientas' },
+    { class: 'devicon-vscode-plain colored',        label: 'VS Code',     cat: 'herramientas' },
+    { class: 'devicon-vim-plain colored',           label: 'Vim',         cat: 'herramientas' },
+    { class: 'devicon-jira-plain colored',          label: 'Jira',        cat: 'herramientas' },
+    { class: 'devicon-webpack-plain colored',       label: 'Webpack',     cat: 'herramientas' },
+    { class: 'devicon-nginx-original',              label: 'Nginx',       cat: 'herramientas' },
+    { class: 'devicon-linux-plain colored',         label: 'Linux',       cat: 'herramientas' },
+    { class: 'devicon-ubuntu-plain colored',       label: 'Ubuntu',      cat: 'herramientas' },
+    { class: 'devicon-postman-plain colored',      label: 'Postman',     cat: 'herramientas' },
+
+    // Cloud / DevOps
+    { class: 'devicon-amazonwebservices-plain colored', label: 'AWS',        cat: 'cloud' },
+    { class: 'devicon-azure-plain colored',             label: 'Azure',      cat: 'cloud' },
+    { class: 'devicon-googlecloud-plain colored',       label: 'GCP',        cat: 'cloud' },
+    { class: 'devicon-kubernetes-plain colored',        label: 'Kubernetes', cat: 'cloud' },
+    { class: 'devicon-terraform-plain colored',         label: 'Terraform',  cat: 'cloud' },
+    { class: 'devicon-jenkins-line colored',            label: 'Jenkins',    cat: 'cloud' },
+    { class: 'devicon-circleci-plain colored',          label: 'CircleCI',   cat: 'cloud' },
+    { class: 'devicon-heroku-plain colored',            label: 'Heroku',     cat: 'cloud' },
+    { class: 'devicon-digitalocean-plain colored',      label: 'DigitalOcean', cat: 'cloud' },
+
+    // General (Bootstrap Icons)
+    { class: 'bi bi-globe',           label: 'Web',        cat: 'general' },
+    { class: 'bi bi-diagram-2',       label: 'REST API',   cat: 'general' },
+    { class: 'bi bi-stack',           label: 'Full Stack', cat: 'general' },
+    { class: 'bi bi-cpu-fill',        label: 'AI / ML',    cat: 'general' },
+    { class: 'bi bi-map',             label: 'GIS / Maps', cat: 'general' },
+    { class: 'bi bi-translate',       label: 'i18n',       cat: 'general' },
+    { class: 'bi bi-shield',          label: 'Ciberseg.',  cat: 'general' },
+    { class: 'bi bi-phone',           label: 'Mobile',     cat: 'general' },
+    { class: 'bi bi-bar-chart-line',  label: 'Analytics',  cat: 'general' },
+    { class: 'bi bi-envelope',        label: 'Email',      cat: 'general' },
+    { class: 'bi bi-search',          label: 'SEO',        cat: 'general' },
+];
+
+let currentCat = 'todos';
+let selectedIcon = '{{ form.icono_class.value|default:'' }}';
+
+// ── Renderizar grid ────────────────────────────────────────────────────
+function renderIcons(list) {
+    const grid = document.getElementById('iconGrid');
+    if (!list.length) {
+        grid.innerHTML = '<div class="no-icons">No se encontraron íconos.</div>';
+        return;
+    }
+    grid.innerHTML = list.map(icon => `
+        <div class="icon-item ${selectedIcon === icon.class ? 'selected' : ''}"
+             onclick="selectIcon('${icon.class}', '${icon.label}')"
+             title="${icon.label}">
+            <i class="${icon.class}"></i>
+        </div>
+    `).join('');
+}
+
+function filterIcons() {
+    const q = document.getElementById('iconSearch').value.toLowerCase();
+    let list = currentCat === 'todos' ? ICONS : ICONS.filter(i => i.cat === currentCat);
+    if (q) list = list.filter(i => i.label.toLowerCase().includes(q) || i.class.includes(q));
+    renderIcons(list);
+}
+
+function filterCat(cat, btn) {
+    currentCat = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterIcons();
+}
+
+// ── Seleccionar ícono ──────────────────────────────────────────────────
+function selectIcon(cls, label) {
+    selectedIcon = cls;
+    document.getElementById('iconoInput').value = cls;
+
+    // Auto-rellenar nombre desde el label del ícono
+    document.getElementById('nombreInput').value = label;
+
+    // Actualizar preview
+    document.getElementById('previewIcon').className = cls;
+    document.getElementById('previewName').textContent = label;
+    document.getElementById('iconPreviewBox').style.display = '';
+
+    // Re-render para marcar seleccionado
+    filterIcons();
+}
+
+function clearIcon() {
+    selectedIcon = '';
+    document.getElementById('iconoInput').value = '';
+    document.getElementById('iconPreviewBox').style.display = 'none';
+    filterIcons();
+}
+
+// Actualizar nombre en el preview en tiempo real
+document.getElementById('nombreInput').addEventListener('input', function() {
+    if (selectedIcon) {
+        document.getElementById('previewName').textContent = this.value || 'Ícono seleccionado';
+    }
+});
+
+// ── Init ───────────────────────────────────────────────────────────────
+renderIcons(ICONS);
+
+// Si ya había un ícono guardado, mostrar el picker cerrado y el preview
+if (selectedIcon) {
+    document.getElementById('iconPicker').style.display = 'none';
+    document.getElementById('iconPreviewBox').style.display = '';
+    document.getElementById('previewIcon').className = 'bi ' + selectedIcon;
+}
+
+// Botón "Cambiar" reabre el picker
+document.querySelector('[onclick="clearIcon()"]').addEventListener('click', function() {
+    document.getElementById('iconPicker').style.display = '';
+    filterIcons();
+});
+</script>
+{% endblock %}

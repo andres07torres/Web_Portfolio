@@ -1,0 +1,153 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Personalización{% endblock %}
+{% block page_title %}Personalización de UI{% endblock %}
+{% block breadcrumb %}Cuenta / Personalización{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="admin-table p-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="stat-icon" style="background:rgba(0,212,255,0.1); color:var(--accent-color);">
+                    <i class="bi bi-palette"></i>
+                </div>
+                <div>
+                    <h5 class="text-white fw-bold mb-1">Paleta de Colores</h5>
+                    <p class="footer-text mb-0" style="font-size:.85rem;">Personaliza la apariencia visual de tu portafolio en tiempo real.</p>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row g-4">
+                    <!-- Color de Botones -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Color de Botones y Acentos</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_botones" value="{{ config.color_botones }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_botones.value = this.value">
+                            <input type="text" name="color_botones" id="hex_botones" value="{{ config.color_botones }}" class="form-control bg-transparent border-0 text-accent p-0" style="width:80px; font-family:monospace;" oninput="picker_botones.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Color de Títulos -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Color de Títulos</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_titulos" value="{{ config.color_titulos }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_titulos.value = this.value">
+                            <input type="text" name="color_titulos" id="hex_titulos" value="{{ config.color_titulos }}" class="form-control bg-transparent border-0 p-0" style="width:80px; font-family:monospace; color:{{ config.color_titulos }}" oninput="picker_titulos.value = this.value; this.style.color = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Color del Logo -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Color del Logo (Texto)</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_logo" value="{{ config.color_logo }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_logo.value = this.value">
+                            <input type="text" name="color_logo" id="hex_logo" value="{{ config.color_logo }}" class="form-control bg-transparent border-0 p-0" style="width:80px; font-family:monospace; color:{{ config.color_logo }}" oninput="picker_logo.value = this.value; this.style.color = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Color de Fondo -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Color de Fondo General</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_fondo" value="{{ config.color_fondo }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_fondo.value = this.value">
+                            <input type="text" name="color_fondo" id="hex_fondo" value="{{ config.color_fondo }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_fondo.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Color de Cartas -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Color de Tarjetas</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_cartas" value="{{ config.color_cartas }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_cartas.value = this.value">
+                            <input type="text" name="color_cartas" id="hex_cartas" value="{{ config.color_cartas }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_cartas.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Navbar -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Color de Navbar</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_navbar" value="{{ config.color_navbar }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_navbar.value = this.value">
+                            <input type="text" name="color_navbar" id="hex_navbar" value="{{ config.color_navbar }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_navbar.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="col-md-12">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Color de Footer</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_footer" value="{{ config.color_footer }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_footer.value = this.value">
+                            <input type="text" name="color_footer" id="hex_footer" value="{{ config.color_footer }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_footer.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-2">
+                    <div class="col-12">
+                        <hr class="opacity-25">
+                        <p class="text-accent fw-bold mb-3" style="font-size:.9rem;"><i class="bi bi-layers"></i> Fondos por Sección (Home)</p>
+                    </div>
+
+                    <!-- Sobre Mí -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Sección "Sobre Mí"</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_sobremi" value="{{ config.color_seccion_sobremi }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_sobremi.value = this.value">
+                            <input type="text" name="color_seccion_sobremi" id="hex_sobremi" value="{{ config.color_seccion_sobremi }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_sobremi.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Experiencia -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Sección "Experiencia"</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_experiencia" value="{{ config.color_seccion_experiencia }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_experiencia.value = this.value">
+                            <input type="text" name="color_seccion_experiencia" id="hex_experiencia" value="{{ config.color_seccion_experiencia }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_experiencia.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Proyectos -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Sección "Proyectos"</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_proyectos" value="{{ config.color_seccion_proyectos }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_proyectos.value = this.value">
+                            <input type="text" name="color_seccion_proyectos" id="hex_proyectos" value="{{ config.color_seccion_proyectos }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_proyectos.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+
+                    <!-- Contacto -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white-50" style="font-size:.8rem;">Sección "Contacto"</label>
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);">
+                            <input type="color" id="picker_contacto" value="{{ config.color_seccion_contacto }}" class="form-control form-control-color border-0 bg-transparent" style="width:50px; height:40px; cursor:pointer;" oninput="hex_contacto.value = this.value">
+                            <input type="text" name="color_seccion_contacto" id="hex_contacto" value="{{ config.color_seccion_contacto }}" class="form-control bg-transparent border-0 text-white-50 p-0" style="width:80px; font-family:monospace;" oninput="picker_contacto.value = this.value" maxlength="7">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex modal-footer-custom justify-content-center gap-3 mt-5 pt-4" style="border-top: 1px solid rgba(255,255,255,0.05);">
+                    <button type="submit" class="btn-accent">
+                        Guardar
+                    </button>
+                    <button type="submit" name="reset" value="1" class="btn-danger-ghost" onclick="return confirm('¿Seguro que quieres restaurar los colores originales?')">
+                        <i class="bi bi-arrow-counterclockwise"></i> Restaurar Defectos
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-4 p-3 rounded-3" style="background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.1);">
+            <div class="d-flex gap-2">
+                <i class="bi bi-info-circle text-accent"></i>
+                <p class="footer-text mb-0" style="font-size:.8rem;">
+                    <strong>Nota:</strong> Al guardar los cambios, la aplicación aplicará automáticamente transparencias inteligentes (Glassmorphism) a los colores de las tarjetas y barras para mantener el estilo premium.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

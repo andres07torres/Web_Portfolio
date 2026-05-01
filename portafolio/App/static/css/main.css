@@ -1,0 +1,418 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root {
+    --accent-color: #00d4ff;
+    --glass-bg: rgba(18, 18, 18, 0.8);
+    --text-main: #f8f9fa;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #0f0f0f;
+}
+
+.custom-navbar {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-navbar.navbar-scrolled {
+    padding: 1rem 0;
+    background: rgba(10, 10, 10, 0.95) !important;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+    background: linear-gradient(45deg, #fff, var(--accent-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin: 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 50%;
+    background-color: var(--accent-color);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+    width: 80%;
+}
+
+.nav-link:hover {
+    color: var(--text-main) !important;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+/* User dropdown en navbar */
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: rgba(0, 212, 255, 0.08) !important;
+    color: #fff !important;
+}
+.dropdown-toggle::after {
+    border-color: rgba(0, 212, 255, 0.6) transparent transparent;
+}
+
+.skill-badge {
+    border: 1px solid var(--accent-color);
+    border-radius: 6px;
+    padding: 4px 10px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Íconos dentro del badge */
+.skill-badge i,
+.skill-badge [class*="devicon-"],
+.skill-badge [class*="bi "] {
+    font-size: 0.95rem !important;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.skill-badge:hover {
+    background: rgba(0, 212, 255, 0.12);
+    border-color: #00d4ff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+}
+
+
+
+.nav-login {
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+    padding: 6px 16px !important;
+    margin-left: 15px !important;
+    transition: all 0.3s ease;
+}
+
+.nav-login:hover {
+    background: var(--accent-color);
+    color: #000 !important;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+}
+
+@media (max-width: 991px) {
+    .navbar-nav {
+        padding: 1.5rem 0;
+        text-align: center;
+    }
+    .nav-item {
+        padding: 8px 0;
+    }
+    .nav-login {
+        margin-left: 0 !important;
+        margin-top: 10px !important;
+        display: inline-block;
+    }
+    .responsive-title {
+        font-size: calc(1.8rem + 1.5vw) !important;
+    }
+}
+
+/* --- BUTTONS --- */
+.btn-accent {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--accent-color) !important;
+    color: #fff !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+
+.btn-accent:hover {
+    background: var(--accent-color) !important;
+    color: #000 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3) !important;
+}
+
+.btn-accent:active {
+    transform: translateY(-1px) !important;
+}
+
+.navbar-toggler {
+    border: none;
+    padding: 0;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0, 212, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E") !important;
+}
+/* Efecto de elevación para proyectos */
+.transition-up {
+    transition: all 0.4s ease;
+}
+.transition-up:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+}
+
+/* Estilo para los campos del formulario */
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border-color: var(--accent-color) !important;
+    color: white !important;
+    box-shadow: none;
+}
+
+/* Ajuste de scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+/* --- FOOTER STYLES --- */
+.custom-footer {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 60px 0 30px;
+}
+
+.footer-logo {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.footer-text {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.footer-title {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.footer-links a:hover {
+    color: var(--accent-color);
+    padding-left: 5px;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border-radius: 50%;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.social-links a:hover {
+    background: var(--accent-color);
+    color: #000;
+    transform: translateY(-5px);
+}
+
+.footer-bottom {
+    margin-top: 50px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+}
+/* --- UTILITIES --- */
+.text-accent {
+    color: var(--accent-color) !important;
+}
+
+.glass-card {
+    background: var(--glass-bg);
+    border: 1px solid rgba(0, 212, 255, 0.4); /* Borde cyan más visible por defecto */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 15px;
+}
+
+section {
+    scroll-margin-top: 70px;
+}
+
+
+/* Timeline */
+.timeline-line {
+    position: absolute;
+    left: 20px;
+    width: 2px;
+    background: rgba(0, 212, 255, 0.2);
+    top: 0;
+    height: 100%;
+}
+
+.timeline-point {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: var(--accent-color);
+    left: 13px;
+    top: 32px;
+    box-shadow: 0 0 10px var(--accent-color);
+    z-index: 1;
+    border-radius: 50%;
+}
+
+
+/* Active state for navigation */
+.nav-link.active {
+    color: var(--text-main) !important;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+.nav-link.active::after {
+    width: 80%;
+}
+
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* Offset for fixed navbar */
+}
+
+
+.ls-minus-1 {
+    letter-spacing: -1px;
+}
+.icon-social {
+    width: 35px;
+    height: 35px;
+}
+
+
+/* Active Navigation State */
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.active:hover {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+/* --- BACK TO TOP BUTTON --- */
+.btn-back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    background: rgba(15, 15, 15, 0.7);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.btn-back-to-top:not(.visible) {
+    transform: translateY(20px);
+}
+
+.btn-back-to-top:hover {
+    background: var(--accent-color);
+    color: #000;
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+}
+
+.btn-back-to-top i {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .btn-back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+

@@ -1,0 +1,100 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Resumen del contenido{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="stat-icon"><i class="bi bi-person-circle"></i></div>
+                <span class="badge-accent">Activo</span>
+            </div>
+            <div class="stat-value">{{ tiene_acercade|yesno:"1,0" }}</div>
+            <div class="stat-label">Perfil "Sobre mí"</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="stat-icon"><i class="bi bi-tools"></i></div>
+            </div>
+            <div class="stat-value">{{ num_habilidades }}</div>
+            <div class="stat-label">Habilidades</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="stat-icon"><i class="bi bi-briefcase"></i></div>
+            </div>
+            <div class="stat-value">{{ num_experiencias }}</div>
+            <div class="stat-label">Experiencias</div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="stat-icon"><i class="bi bi-code-slash"></i></div>
+            </div>
+            <div class="stat-value">{{ num_proyectos }}</div>
+            <div class="stat-label">Proyectos</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="admin-table">
+            <div class="d-flex align-items-center justify-content-between p-3" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                <h6 class="text-white mb-0 fw-semibold" style="font-size:.875rem;">Acceso Rápido</h6>
+            </div>
+            <div class="p-3">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'dashboard_acercade' %}" class="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none" style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.1);transition:all .25s ease;" onmouseover="this.style.background='rgba(0,212,255,0.1)'" onmouseout="this.style.background='rgba(0,212,255,0.05)'">
+                            <i class="bi bi-person-circle fs-4 text-accent"></i>
+                            <div>
+                                <div class="text-white fw-medium" style="font-size:.85rem;">Sobre Mí</div>
+                                <div class="footer-text" style="font-size:.75rem;">Editar perfil</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'dashboard_habilidades' %}" class="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none" style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.1);transition:all .25s ease;" onmouseover="this.style.background='rgba(0,212,255,0.1)'" onmouseout="this.style.background='rgba(0,212,255,0.05)'">
+                            <i class="bi bi-tools fs-4 text-accent"></i>
+                            <div>
+                                <div class="text-white fw-medium" style="font-size:.85rem;">Habilidades</div>
+                                <div class="footer-text" style="font-size:.75rem;">Gestionar stack</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'dashboard_experiencias' %}" class="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none" style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.1);transition:all .25s ease;" onmouseover="this.style.background='rgba(0,212,255,0.1)'" onmouseout="this.style.background='rgba(0,212,255,0.05)'">
+                            <i class="bi bi-briefcase fs-4 text-accent"></i>
+                            <div>
+                                <div class="text-white fw-medium" style="font-size:.85rem;">Experiencia</div>
+                                <div class="footer-text" style="font-size:.75rem;">Historial laboral</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <a href="{% url 'dashboard_proyectos' %}" class="d-flex align-items-center gap-3 p-3 rounded-3 text-decoration-none" style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.1);transition:all .25s ease;" onmouseover="this.style.background='rgba(0,212,255,0.1)'" onmouseout="this.style.background='rgba(0,212,255,0.05)'">
+                            <i class="bi bi-code-slash fs-4 text-accent"></i>
+                            <div>
+                                <div class="text-white fw-medium" style="font-size:.85rem;">Proyectos</div>
+                                <div class="footer-text" style="font-size:.75rem;">Portafolio</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

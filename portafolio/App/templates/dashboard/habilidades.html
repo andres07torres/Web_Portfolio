@@ -1,0 +1,554 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Habilidades{% endblock %}
+{% block page_title %}Habilidades{% endblock %}
+{% block breadcrumb %}Contenido → Habilidades{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Modal overlay ─────────────────────────────── */
+/* ── Modal overlay ─────────────────────────────── */
+.hab-modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999 !important;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+}
+.hab-modal-overlay.open { display: flex; }
+
+.hab-modal {
+    background: rgba(18,18,28,0.95);
+    border: 1px solid rgba(0,212,255,0.25);
+    border-radius: 16px;
+    box-shadow: 0 0 40px rgba(0,212,255,0.12);
+    width: min(560px, 94vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.6rem;
+    animation: slideUp .2s ease;
+}
+@keyframes slideUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Icon picker dentro del modal ──────────────── */
+.m-picker-search {
+    width:100%; background:rgba(255,255,255,0.04);
+    border:1px solid rgba(0,212,255,0.18); border-radius:8px;
+    padding:.55rem .9rem; color:#fff; font-size:.85rem; outline:none;
+    margin-bottom:.6rem;
+}
+.m-picker-search::placeholder { color:rgba(255,255,255,.35); }
+.m-cat-row { display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.6rem; }
+.m-cat-btn {
+    background:transparent; border:1px solid rgba(255,255,255,.12);
+    border-radius:20px; color:rgba(255,255,255,.5); font-size:.72rem;
+    padding:.28rem .75rem; cursor:pointer; transition:.15s;
+}
+.m-cat-btn:hover,.m-cat-btn.active { border-color:#00d4ff; color:#00d4ff; }
+.m-icon-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(42px,1fr));
+    gap:3px; max-height:240px; overflow-y:auto;
+    background:rgba(8,8,8,.5); border-radius:8px; padding:.5rem;
+}
+.m-icon-item {
+    display:flex; align-items:center; justify-content:center;
+    padding:9px 5px; border-radius:7px; cursor:pointer;
+    border:1px solid transparent; transition:.14s;
+}
+.m-icon-item i { font-size:1.25rem; color:rgba(255,255,255,.85); }
+/* Todos los devicons: forzar gris para los que aparecen negros */
+.m-icon-item i[class*="devicon-"] { color: rgba(255,255,255,0.75); }
+/* Devicons sin versión colored: forzar visible con filtro */
+.m-icon-item i[class*="devicon-"]:not([class*="colored"]) {
+    filter: brightness(0) invert(0.75);
+}
+.m-icon-item:hover { background:rgba(0,212,255,.07); border-color:rgba(0,212,255,.2); }
+.m-icon-item:hover i { color:#00d4ff; filter:brightness(1.15)!important; }
+.m-icon-item.selected { background:rgba(0,212,255,.12); border-color:#00d4ff; }
+.m-icon-item.selected i { color:#00d4ff; filter:brightness(1.2)!important; }
+
+.m-preview {
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:rgba(0,212,255,.08); border:1px solid rgba(0,212,255,.25);
+    border-radius:8px; padding:.45rem .9rem;
+    color:#00d4ff; font-weight:600; font-size:.9rem;
+    margin-bottom:.8rem;
+}
+.m-preview i { font-size:1.3rem; }
+.m-error { color:#ff4d6d; font-size:.8rem; margin-top:.3rem; display:none; }
+
+/* ── Grid y Tarjetas de Habilidades (Compactas) ───────────────── */
+.skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 576px) {
+    .skill-grid { grid-template-columns: 1fr; }
+}
+
+.skill-card-compact {
+    background: rgba(18,18,28,0.5);
+    border: 1px solid rgba(0,212,255,0.12);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.skill-card-compact:hover {
+    background: rgba(0,212,255,0.04);
+    border-color: rgba(0,212,255,0.3);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.skill-card-icon {
+    width: 46px; height: 46px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    color: var(--accent-color);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.skill-card-compact:hover .skill-card-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: var(--accent-color);
+    color: #000;
+}
+
+.skill-card-info { flex: 1; min-width: 0; }
+.skill-card-name {
+    color: #fff; font-weight: 600; font-size: 1.05rem;
+    margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.skill-card-tag {
+    font-size: 0.75rem; color: rgba(255,255,255,0.35);
+    display: flex; align-items: center; gap: 0.3rem;
+}
+
+.skill-card-actions {
+    display: flex; gap: 0.5rem; opacity: 0.6; transition: opacity 0.2s;
+}
+.skill-card-compact:hover .skill-card-actions { opacity: 1; }
+
+.btn-action-small {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.5);
+    transition: all 0.2s;
+}
+.btn-action-small:hover { border-color: #00d4ff; color: #00d4ff; background: rgba(0,212,255,0.1); }
+.btn-action-small.delete:hover { border-color: #ff4d6d; color: #ff4d6d; background: rgba(255,77,109,0.1); }
+</style>
+{% endblock extra_css %}
+
+
+{% block extra_actions %}{% endblock %}
+
+
+{% block content %}
+
+{# ── Barra de acciones ─────────────────────── #}
+<div class="d-flex align-items-center justify-content-end gap-2 mb-4 action-bar-responsive">
+    <button onclick="openHabModal()" class="btn-accent">Nueva habilidad</button>
+    <a href="javascript:void(0)"
+       data-reset-url="{% url 'dashboard_reset_habilidades' %}"
+       data-reset-label="todas las habilidades"
+       onclick="swalConfirmReset(this)"
+       class="btn-ghost" style="border-color:rgba(255,150,0,0.3);color:rgba(255,150,0,0.8);font-size:.8rem;">
+        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+    </a>
+</div>
+
+{# ── Modal inline ──────────────────────── #}
+<div class="hab-modal-overlay" id="habModalOverlay" onclick="closeHabModalOutside(event)">
+  <div class="hab-modal" id="habModal">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h6 class="text-white fw-bold mb-0" id="habModalTitle">Nueva Habilidad</h6>
+      <button onclick="closeHabModal()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:1.3rem;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+
+    <form id="habForm" onsubmit="submitHab(event)">
+      {% csrf_token %}
+      <input type="hidden" id="habNombre">
+      <input type="hidden" id="habIcono">
+      <input type="hidden" id="habPk">
+
+      {# Preview del ícono seleccionado #}
+      <div id="habPreview" style="display:none;" class="mb-2">
+        <div class="m-preview">
+          <i id="habPreviewIcon"></i>
+          <span id="habPreviewLabel"></span>
+        </div>
+        <button type="button" onclick="clearHabIcon()" style="background:none;border:none;color:rgba(0,212,255,.6);font-size:.78rem;cursor:pointer;padding:0;">
+          <i class="bi bi-x me-1"></i>Cambiar ícono
+        </button>
+      </div>
+
+      {# Picker #}
+      <div id="habPickerWrap">
+        <label class="form-label mb-1" style="font-size:.82rem;">Ícono <span class="text-accent">*</span></label>
+        <input type="text" class="m-picker-search" id="habSearch" placeholder="🔍  Buscar ícono..." oninput="filterHabIcons()">
+        <div class="m-cat-row" id="habCats">
+          <button class="m-cat-btn active" onclick="filterHabCat('todos',this)" type="button">Todos</button>
+          <button class="m-cat-btn" onclick="filterHabCat('lenguajes',this)" type="button">Lenguajes</button>
+          <button class="m-cat-btn" onclick="filterHabCat('frameworks',this)" type="button">Frameworks</button>
+          <button class="m-cat-btn" onclick="filterHabCat('bases-de-datos',this)" type="button">Bases de datos</button>
+          <button class="m-cat-btn" onclick="filterHabCat('herramientas',this)" type="button">Herramientas</button>
+          <button class="m-cat-btn" onclick="filterHabCat('cloud',this)" type="button">Cloud / DevOps</button>
+          <button class="m-cat-btn" onclick="filterHabCat('general',this)" type="button">General</button>
+        </div>
+        <div class="m-icon-grid" id="habIconGrid"></div>
+      </div>
+
+      <div class="mt-3">
+        <label class="form-label" style="font-size:.82rem;">Orden de aparición</label>
+        <input type="number" id="habOrden" class="form-control" value="0" min="0" style="max-width:120px;">
+      </div>
+
+      <div class="m-error" id="habError"></div>
+
+      <div class="d-flex modal-footer-custom justify-content-center gap-2 mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,.06);">
+        <button type="submit" class="btn-accent" id="habSubmitBtn">
+          Guardar
+        </button>
+        <button type="button" onclick="closeHabModal()" class="btn-warning-ghost">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Lista de habilidades (Horizontal) ─────────────────── #}
+{% if habilidades %}
+<div id="habilidadesGrid" class="skill-grid">
+    {% for h in habilidades %}
+    <div class="skill-card-compact" id="hab-card-{{ h.pk }}">
+        <div class="skill-card-icon">
+            <i class="{{ h.icono_class }}"></i>
+        </div>
+        <div class="skill-card-info">
+            <p class="skill-card-name">{{ h.nombre }}</p>
+            <span class="skill-card-tag"><i class="bi bi-cpu-fill"></i> Tecnología</span>
+        </div>
+        <div class="skill-card-actions">
+            <button onclick="prepareHabEdit(this)"
+                    data-pk="{{ h.pk }}"
+                    data-nombre="{{ h.nombre|escapejs }}"
+                    data-icono="{{ h.icono_class|escapejs }}"
+                    data-orden="{{ h.orden }}"
+                    title="Editar"
+                    class="btn-action-small">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button onclick="swalConfirmDelete('{% url 'dashboard_habilidad_eliminar' h.pk %}', '{{ h.nombre|escapejs }}')" 
+                    title="Eliminar"
+                    class="btn-action-small delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="admin-table mx-auto" id="habilidadesGrid" style="max-width:420px;">
+    <div class="text-center py-5" id="emptyState">
+        <i class="bi bi-tools fs-1 text-accent opacity-50"></i>
+        <p class="footer-text mt-3">No hay habilidades registradas.</p>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// ── Catálogo de íconos ──────────────────────────────────────
+const HAB_ICONS = [
+    // Lenguajes
+    { class:'devicon-python-plain colored',         label:'Python',       cat:'lenguajes' },
+    { class:'devicon-javascript-plain colored',     label:'JavaScript',   cat:'lenguajes' },
+    { class:'devicon-typescript-plain colored',     label:'TypeScript',   cat:'lenguajes' },
+    { class:'devicon-java-plain colored',           label:'Java',         cat:'lenguajes' },
+    { class:'devicon-csharp-plain colored',         label:'C#',           cat:'lenguajes' },
+    { class:'devicon-cplusplus-plain colored',      label:'C++',          cat:'lenguajes' },
+    { class:'devicon-c-plain colored',              label:'C',            cat:'lenguajes' },
+    { class:'devicon-go-plain colored',             label:'Go',           cat:'lenguajes' },
+    { class:'devicon-ruby-plain colored',           label:'Ruby',         cat:'lenguajes' },
+    { class:'devicon-php-plain colored',            label:'PHP',          cat:'lenguajes' },
+    { class:'devicon-rust-plain colored',           label:'Rust',         cat:'lenguajes' },
+    { class:'devicon-kotlin-plain colored',         label:'Kotlin',       cat:'lenguajes' },
+    { class:'devicon-swift-plain colored',          label:'Swift',        cat:'lenguajes' },
+    { class:'devicon-html5-plain colored',          label:'HTML5',        cat:'lenguajes' },
+    { class:'devicon-css3-plain colored',           label:'CSS3',         cat:'lenguajes' },
+    { class:'devicon-scala-plain colored',          label:'Scala',        cat:'lenguajes' },
+    { class:'devicon-r-plain colored',              label:'R',            cat:'lenguajes' },
+    { class:'devicon-bash-plain colored',           label:'Bash',         cat:'lenguajes' },
+    { class:'devicon-lua-plain colored',            label:'Lua',          cat:'lenguajes' },
+    // Frameworks y librerías
+    { class:'devicon-django-plain colored',         label:'Django',       cat:'frameworks' },
+    { class:'devicon-fastapi-plain colored',        label:'FastAPI',      cat:'frameworks' },
+    { class:'devicon-flask-original',               label:'Flask',        cat:'frameworks' },
+    { class:'devicon-react-original colored',       label:'React',        cat:'frameworks' },
+    { class:'devicon-vuejs-plain colored',          label:'Vue.js',       cat:'frameworks' },
+    { class:'devicon-angularjs-plain colored',      label:'Angular',      cat:'frameworks' },
+    { class:'devicon-nextjs-plain',                 label:'Next.js',      cat:'frameworks' },
+    { class:'devicon-nodejs-plain colored',         label:'Node.js',      cat:'frameworks' },
+    { class:'devicon-express-original',             label:'Express',      cat:'frameworks' },
+    { class:'devicon-bootstrap-plain colored',      label:'Bootstrap',    cat:'frameworks' },
+    { class:'devicon-tailwindcss-plain colored',    label:'Tailwind',     cat:'frameworks' },
+    { class:'devicon-spring-plain colored',         label:'Spring',       cat:'frameworks' },
+    { class:'devicon-laravel-plain colored',        label:'Laravel',      cat:'frameworks' },
+    { class:'devicon-tensorflow-original colored',  label:'TensorFlow',   cat:'frameworks' },
+    { class:'devicon-pytorch-plain colored',        label:'PyTorch',      cat:'frameworks' },
+    { class:'bi bi-bar-chart-fill',                 label:'Pandas',       cat:'frameworks' },
+    { class:'devicon-numpy-plain colored',          label:'NumPy',        cat:'frameworks' },
+    // Bases de datos
+    { class:'devicon-postgresql-plain colored',     label:'PostgreSQL',   cat:'bases-de-datos' },
+    { class:'devicon-mysql-plain colored',          label:'MySQL',        cat:'bases-de-datos' },
+    { class:'devicon-mongodb-plain colored',        label:'MongoDB',      cat:'bases-de-datos' },
+    { class:'devicon-redis-plain colored',          label:'Redis',        cat:'bases-de-datos' },
+    { class:'devicon-sqlite-plain colored',         label:'SQLite',       cat:'bases-de-datos' },
+    { class:'devicon-oracle-original colored',      label:'Oracle',       cat:'bases-de-datos' },
+    { class:'devicon-firebase-plain colored',       label:'Firebase',     cat:'bases-de-datos' },
+    // Herramientas
+    { class:'devicon-git-plain colored',            label:'Git',          cat:'herramientas' },
+    { class:'devicon-github-original',              label:'GitHub',       cat:'herramientas' },
+    { class:'devicon-gitlab-plain colored',         label:'GitLab',       cat:'herramientas' },
+    { class:'devicon-docker-plain colored',         label:'Docker',       cat:'herramientas' },
+    { class:'devicon-vscode-plain colored',         label:'VS Code',      cat:'herramientas' },
+    { class:'devicon-vim-plain colored',            label:'Vim',          cat:'herramientas' },
+    { class:'devicon-figma-plain colored',          label:'Figma',        cat:'herramientas' },
+    { class:'devicon-jira-plain colored',           label:'Jira',         cat:'herramientas' },
+    { class:'bi bi-plug-fill',                         label:'REST APIs',    cat:'herramientas' },
+    { class:'devicon-nginx-original colored',       label:'Nginx',        cat:'herramientas' },
+    { class:'devicon-linux-plain colored',          label:'Linux',        cat:'herramientas' },
+    // Cloud / DevOps
+    { class:'devicon-amazonwebservices-plain colored', label:'AWS',       cat:'cloud' },
+    { class:'devicon-azure-plain colored',          label:'Azure',        cat:'cloud' },
+    { class:'devicon-googlecloud-plain colored',    label:'Google Cloud', cat:'cloud' },
+    { class:'devicon-kubernetes-plain colored',     label:'Kubernetes',   cat:'cloud' },
+    { class:'devicon-ansible-plain colored',        label:'Ansible',      cat:'cloud' },
+    { class:'devicon-terraform-plain colored',      label:'Terraform',    cat:'cloud' },
+    { class:'devicon-heroku-plain colored',         label:'Heroku',       cat:'cloud' },
+    { class:'devicon-digitalocean-plain colored',   label:'DigitalOcean', cat:'cloud' },
+    { class:'devicon-circleci-plain colored',       label:'CircleCI',     cat:'cloud' },
+    // General
+    { class:'bi bi-shield-lock-fill',               label:'Seguridad',    cat:'general' },
+    { class:'bi bi-graph-up-arrow',                 label:'Analytics',    cat:'general' },
+    { class:'bi bi-cpu-fill',                       label:'IA / ML',      cat:'general' },
+    { class:'bi bi-phone-fill',                     label:'Móvil',        cat:'general' },
+    { class:'bi bi-terminal-fill',                  label:'CLI',          cat:'general' },
+    { class:'bi bi-box-seam-fill',                  label:'DevOps',       cat:'general' },
+    { class:'bi bi-diagram-3-fill',                 label:'Arquitectura', cat:'general' },
+    { class:'bi bi-globe2',                         label:'Web',          cat:'general' },
+    { class:'bi bi-lightning-charge-fill',          label:'Performance',  cat:'general' },
+];
+
+let habSelectedIcon = '';
+let habCurrentCat   = 'todos';
+const AJAX_URL = '{% url "dashboard_habilidad_nueva_ajax" %}';
+const CSRF     = '{{ csrf_token }}';
+
+// ── Abrir / cerrar modal ─────────────────────────────────────
+function openHabModal() {
+    document.getElementById('habPk').value = '';
+    document.getElementById('habNombre').value = '';
+    document.getElementById('habIcono').value  = '';
+    document.getElementById('habOrden').value  = '0';
+    document.getElementById('habModalTitle').textContent = 'Nueva Habilidad';
+    habSelectedIcon = '';
+    document.getElementById('habPreview').style.display = 'none';
+    document.getElementById('habPickerWrap').style.display = '';
+    document.getElementById('habError').style.display = 'none';
+    document.getElementById('habSearch').value = '';
+    habCurrentCat = 'todos';
+    document.querySelectorAll('.m-cat-btn').forEach(b => b.classList.toggle('active', b.textContent === 'Todos'));
+    renderHabIcons(HAB_ICONS);
+    document.getElementById('habModalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('habSearch').focus(), 100);
+}
+
+function closeHabModal() {
+    document.getElementById('habModalOverlay').classList.remove('open');
+}
+
+function prepareHabEdit(btn) {
+    const pk = btn.getAttribute('data-pk');
+    const nombre = btn.getAttribute('data-nombre');
+    const icono = btn.getAttribute('data-icono');
+    const orden = btn.getAttribute('data-orden');
+
+    openHabModal(); // Limpia campos primero
+    document.getElementById('habModalTitle').textContent = 'Editar Habilidad';
+    document.getElementById('habPk').value = pk;
+    document.getElementById('habOrden').value = orden;
+    
+    // El picker de habilidades pre-selecciona el icono y el nombre
+    if (icono) {
+        selectHabIcon(icono, nombre);
+    }
+}
+
+function closeHabModalOutside(e) {
+    if (e.target === document.getElementById('habModalOverlay')) closeHabModal();
+}
+
+// ── Picker ───────────────────────────────────────────────────
+function renderHabIcons(list) {
+    const g = document.getElementById('habIconGrid');
+    if (!list.length) {
+        g.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.25);padding:1.5rem;font-size:.82rem;">Sin resultados</div>';
+        return;
+    }
+    g.innerHTML = list.map(i => `
+        <div class="m-icon-item ${habSelectedIcon === i.class ? 'selected' : ''}"
+             onclick="selectHabIcon('${i.class}','${i.label}')"
+             title="${i.label}">
+            <i class="${i.class}"></i>
+        </div>`).join('');
+}
+
+function filterHabIcons() {
+    const q = document.getElementById('habSearch').value.toLowerCase();
+    const filtered = HAB_ICONS.filter(i =>
+        (habCurrentCat === 'todos' || i.cat === habCurrentCat) &&
+        (!q || i.label.toLowerCase().includes(q))
+    );
+    renderHabIcons(filtered);
+}
+
+function filterHabCat(cat, btn) {
+    habCurrentCat = cat;
+    document.querySelectorAll('.m-cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterHabIcons();
+}
+
+function selectHabIcon(cls, label) {
+    habSelectedIcon = cls;
+    document.getElementById('habIcono').value  = cls;
+    document.getElementById('habNombre').value = label;
+    document.getElementById('habPreviewIcon').className  = cls;
+    document.getElementById('habPreviewLabel').textContent = label;
+    document.getElementById('habPreview').style.display  = '';
+    document.getElementById('habPickerWrap').style.display = 'none';
+    document.getElementById('habError').style.display = 'none';
+}
+
+function clearHabIcon() {
+    habSelectedIcon = '';
+    document.getElementById('habIcono').value  = '';
+    document.getElementById('habNombre').value = '';
+    document.getElementById('habPreview').style.display = 'none';
+    document.getElementById('habPickerWrap').style.display = '';
+    renderHabIcons(HAB_ICONS);
+}
+
+// ── Enviar AJAX ──────────────────────────────────────────────
+async function submitHab(e) {
+    e.preventDefault();
+    const icono  = document.getElementById('habIcono').value;
+    const nombre = document.getElementById('habNombre').value;
+    const orden  = document.getElementById('habOrden').value;
+    const pk     = document.getElementById('habPk').value;
+    const errEl  = document.getElementById('habError');
+
+    if (!icono) {
+        errEl.textContent = 'Selecciona un ícono primero.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const btn = document.getElementById('habSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF);
+    fd.append('nombre', nombre);
+    fd.append('icono_class', icono);
+    fd.append('orden', orden);
+    if (pk) fd.append('pk', pk);
+
+    try {
+        const res  = await fetch(AJAX_URL, { method:'POST', body:fd });
+        const data = await res.json();
+
+        if (data.success) {
+            Toast.fire({
+                icon: 'success', title: `✓ Habilidad ${data.accion} correctamente`
+            });
+            insertOrUpdateCard(data);
+            closeHabModal();
+        }
+
+    } catch(err) {
+        errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+        errEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Guardar';
+    }
+}
+
+function insertOrUpdateCard(data) {
+    // Construir el HTML de la card horizontal compacta
+    const cardHTML = `
+    <div class="skill-card-compact" id="hab-card-${data.pk}">
+        <div class="skill-card-icon">
+            <i class="${data.icono_class}"></i>
+        </div>
+        <div class="skill-card-info">
+            <p class="skill-card-name">${data.nombre}</p>
+            <span class="skill-card-tag"><i class="bi bi-cpu-fill"></i> Tecnología</span>
+        </div>
+        <div class="skill-card-actions">
+            <button onclick="prepareHabEdit(this)"
+                    data-pk="${data.pk}"
+                    data-nombre="${(data.nombre||'').replace(/"/g,'&quot;')}"
+                    data-icono="${(data.icono_class||'').replace(/"/g,'&quot;')}"
+                    data-orden="${data.orden}"
+                    title="Editar"
+                    class="btn-action-small">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button onclick="swalConfirmDelete('${data.delete_url}', '${(data.nombre||'').replace(/'/g,"\\'")}')" 
+                    title="Eliminar"
+                    class="btn-action-small delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>`;
+
+    const grid   = document.getElementById('habilidadesGrid');
+    const empty  = document.getElementById('emptyState');
+    const existing = document.getElementById(`hab-card-${data.pk}`);
+
+    if (empty) {
+        grid.outerHTML = `<div id="habilidadesGrid" class="skill-grid">${cardHTML}</div>`;
+        return;
+    }
+
+    if (existing) {
+        existing.outerHTML = cardHTML;
+    } else {
+        grid.insertAdjacentHTML('afterbegin', cardHTML);
+    }
+}
+
+// Inicializar picker al cargar
+renderHabIcons(HAB_ICONS);
+</script>
+{% endblock %}

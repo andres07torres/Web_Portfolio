@@ -1,0 +1,23 @@
+# Django core
+Django==6.0.2
+asgiref==3.11.1
+sqlparse==0.5.5
+
+# Base de datos PostgreSQL
+psycopg2-binary==2.9.11
+
+# Variables de entorno
+python-dotenv==1.2.2
+
+# CKEditor
+django-ckeditor==6.7.3
+django-js-asset==3.1.2
+
+# Imágenes
+pillow==12.1.1
+
+# Servidor WSGI para producción
+gunicorn==23.0.0
+
+# Archivos estáticos en producción
+whitenoise==6.12.0

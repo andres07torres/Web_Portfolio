@@ -1,0 +1,50 @@
+<section id="experiencia" class="py-5">
+    <div class="container">
+        <div class="mb-5">
+            <h2 class="display-5 fw-bold mb-2">Mi <span class="text-accent">Experiencia</span></h2>
+            <p class="footer-text">Trayectoria profesional y roles desempeñados.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10 position-relative">
+                <!-- Timeline Line -->
+                <div class="timeline-line"></div>
+
+                {% if experiencias %}
+                    {% for exp in experiencias %}
+                        <!-- Experiencia {{ forloop.counter }} -->
+                        <div class="col-12 mb-4 position-relative">
+                            <!-- Timeline Point -->
+                            <div class="timeline-point"></div>
+
+                            <div class="ms-5 p-4 transition-up glass-card">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+                                    <h4 class="text-white fw-bold mb-1 h5">{{ exp.cargo }}</h4>
+                                    <span
+                                        class="badge bg-transparent border border-secondary text-white-50 px-3 py-2 mt-2 mt-md-0">
+                                        {{ exp.periodo }}
+                                    </span>
+                                </div>
+                                <h6 class="text-accent mb-3"><i class="bi bi-building me-2"></i>{{ exp.empresa }}</h6>
+                                <div class="footer-text small mb-0 exp-description">
+                                    {{ exp.descripcion|safe }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Fallback -->
+                    <div class="col-12 mb-4 position-relative">
+                        <div class="timeline-point"></div>
+                        <div class="ms-5 p-4 transition-up glass-card">
+                            <h4 class="text-white fw-bold mb-1 h5">Desarrollador Freelance (Ejemplo)</h4>
+                            <h6 class="text-accent mb-3"><i class="bi bi-building me-2"></i>Varios Clientes</h6>
+                            <p class="footer-text small">Por favor, añade tu experiencia desde el panel de administración.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>

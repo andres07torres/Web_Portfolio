@@ -1,0 +1,41 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}{{ titulo_form }} Experiencia{% endblock %}
+{% block page_title %}{{ titulo_form }} Experiencia{% endblock %}
+{% block breadcrumb %}Contenido → Experiencia → {{ titulo_form }}{% endblock %}
+
+{% block content %}
+
+<div class="form-card mx-auto" style="max-width:680px;">
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Cargo / Puesto <span class="text-accent">*</span></label>
+                <input type="text" name="cargo" class="form-control" placeholder="Ej: Desarrollador Backend Freelance" value="{{ form.cargo.value|default:'' }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Empresa / Institución <span class="text-accent">*</span></label>
+                <input type="text" name="empresa" class="form-control" placeholder="Ej: Varios Clientes" value="{{ form.empresa.value|default:'' }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Período <span class="text-accent">*</span></label>
+                <input type="text" name="periodo" class="form-control" placeholder="Ej: Ene 2025 - Presente" value="{{ form.periodo.value|default:'' }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Orden de aparición</label>
+                <input type="number" name="orden" class="form-control" placeholder="1" value="{{ form.orden.value|default:'0' }}" min="0">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Descripción / Logros <span class="text-accent">*</span></label>
+                <textarea name="descripcion" class="form-control" placeholder="Describe tus responsabilidades y logros. Puedes usar HTML básico: &lt;ul&gt;&lt;li&gt;Logro...&lt;/li&gt;&lt;/ul&gt;" style="min-height:160px;">{{ form.descripcion.value|default:'' }}</textarea>
+                <div class="footer-text mt-1" style="font-size:.76rem;">Puedes usar HTML como <code style="color:var(--accent-color)">&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;</code> para listas de logros.</div>
+            </div>
+        </div>
+        <div class="d-flex modal-footer-custom align-items-center justify-content-center gap-2 mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,0.06);">
+            <button type="submit" class="btn-accent">Guardar</button>
+            <a href="{% url 'dashboard_experiencias' %}" class="btn-warning-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

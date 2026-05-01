@@ -1,0 +1,129 @@
+<section id="contacto" class="py-4 py-md-5">
+    <div class="container text-center">
+        <div class="mb-4 mb-md-5">
+            <h2 class="display-6 display-md-5 fw-bold mb-2">Ponte en <span class="text-accent">Contacto</span></h2>
+            <p class="footer-text">Envíame un mensaje y te responderé lo más pronto posible.</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-8 p-3 p-md-5 glass-card rounded-4 mx-2 mx-md-0 transition-up">
+                <h2 class="h5 fw-bold mb-3 mb-md-4 text-white">¿Hablamos de tu <span class="text-accent">próximo</span> proyecto?</h2>
+
+                <form id="contactForm" class="text-start mt-2 mt-md-3" novalidate>
+                    {% csrf_token %}
+
+                    {# Honeypot: campo invisible para bots #}
+                    <div style="display:none;" aria-hidden="true">
+                        <input type="text" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+
+                    <div class="mb-2 mb-md-3">
+                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_nombre">Tu Nombre</label>
+                        <input type="text" id="c_nombre" name="nombre" required maxlength="100"
+                            class="form-control bg-transparent text-white border-secondary border-opacity-25 py-2"
+                            placeholder="Andr3s Dev">
+                    </div>
+                    <div class="mb-2 mb-md-3">
+                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_correo">Correo</label>
+                        <input type="email" id="c_correo" name="correo" required maxlength="254"
+                            class="form-control bg-transparent text-white border-secondary border-opacity-25 py-2"
+                            placeholder="hola@ejemplo.com">
+                    </div>
+                    <div class="mb-3 mb-md-4">
+                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_mensaje">Mensaje</label>
+                        <textarea id="c_mensaje" name="mensaje" required minlength="10" maxlength="2000"
+                            class="form-control bg-transparent text-white border-secondary border-opacity-25"
+                            rows="3" placeholder="Cuéntame sobre tu proyecto..."></textarea>
+                        <small id="charCount" class="text-end d-block mt-1" style="color:rgba(255,255,255,0.25);font-size:.72rem;">0 / 2000</small>
+                    </div>
+
+                    <button type="submit" id="contactBtn"
+                        class="btn-accent w-100 mt-1 mt-md-2">
+                        <span id="contactBtnText"><i class="bi bi-send me-2"></i>Enviar Mensaje</span>
+                        <span id="contactBtnSpinner" class="d-none">
+                            <span class="spinner-border spinner-border-sm me-2"></span>Enviando...
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+(function () {
+    const form    = document.getElementById('contactForm');
+    const btn     = document.getElementById('contactBtn');
+    const btnText = document.getElementById('contactBtnText');
+    const spinner = document.getElementById('contactBtnSpinner');
+    const charEl  = document.getElementById('charCount');
+    const msgTa   = document.getElementById('c_mensaje');
+
+    // Contador de caracteres del mensaje
+    msgTa.addEventListener('input', () => {
+        const n = msgTa.value.length;
+        charEl.textContent = `${n} / 2000`;
+        charEl.style.color = n > 1900 ? '#ff6b6b' : 'rgba(255,255,255,0.25)';
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Validación básica del lado cliente
+        const nombre  = document.getElementById('c_nombre').value.trim();
+        const correo  = document.getElementById('c_correo').value.trim();
+        const mensaje = msgTa.value.trim();
+
+        if (!nombre || !correo || !mensaje) {
+            Swal.fire({ icon:'warning', title:'Campos incompletos', text:'Por favor completa todos los campos.', background:'rgba(15,15,15,0.98)', color:'#f8f9fa' });
+            return;
+        }
+        if (mensaje.length < 10) {
+            Swal.fire({ icon:'warning', title:'Mensaje muy corto', text:'Escribe al menos 10 caracteres.', background:'rgba(15,15,15,0.98)', color:'#f8f9fa' });
+            return;
+        }
+
+        // Estado de carga
+        btn.disabled = true;
+        btnText.classList.add('d-none');
+        spinner.classList.remove('d-none');
+
+        try {
+            const fd = new FormData(form);
+            const res = await fetch("{% url 'contacto' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': fd.get('csrfmiddlewaretoken') },
+                body: fd,
+            });
+            const data = await res.json();
+
+            if (data.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Enviado!',
+                    text: data.msg,
+                    background: 'rgba(15,15,15,0.98)',
+                    color: '#f8f9fa',
+                    confirmButtonColor: '#00d4ff',
+                });
+                form.reset();
+                charEl.textContent = '0 / 2000';
+            } else {
+                Swal.fire({
+                    icon: res.status === 429 ? 'warning' : 'error',
+                    title: res.status === 429 ? 'Demasiados intentos' : 'Error',
+                    text: data.msg,
+                    background: 'rgba(15,15,15,0.98)',
+                    color: '#f8f9fa',
+                    confirmButtonColor: '#00d4ff',
+                });
+            }
+        } catch {
+            Swal.fire({ icon:'error', title:'Sin conexión', text:'Revisa tu internet e intenta de nuevo.', background:'rgba(15,15,15,0.98)', color:'#f8f9fa' });
+        } finally {
+            btn.disabled = false;
+            btnText.classList.remove('d-none');
+            spinner.classList.add('d-none');
+        }
+    });
+})();
+</script>

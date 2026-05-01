@@ -1,0 +1,534 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Proyectos{% endblock %}
+{% block page_title %}Proyectos{% endblock %}
+{% block breadcrumb %}Contenido → Proyectos{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Grid y Tarjetas de Proyectos (Horizontal) ───────────────── */
+.pry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+    .pry-grid { grid-template-columns: 1fr; }
+}
+
+.pry-card-horizontal {
+    background: rgba(18,18,28,0.5);
+    border: 1px solid rgba(0,212,255,0.12);
+    border-radius: 16px;
+    padding: 1.2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    gap: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.pry-card-horizontal:hover {
+    background: rgba(0,212,255,0.04);
+    border-color: rgba(0,212,255,0.4);
+    transform: translateX(6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.pry-card-left {
+    flex-shrink: 0;
+    width: 65px; height: 65px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem;
+    color: var(--accent-color);
+    transition: all 0.4s ease;
+}
+
+.pry-card-horizontal:hover .pry-card-left {
+    transform: scale(1.1) rotate(8deg);
+    background: var(--accent-color);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+}
+
+.pry-card-body { flex: 1; min-width: 0; }
+.pry-card-title {
+    color: #fff; font-weight: 700; font-size: 1.15rem;
+    margin: 0 0 0.4rem;
+}
+.pry-card-desc {
+    font-size: 0.825rem; color: rgba(255,255,255,0.5);
+    line-height: 1.5; margin-bottom: 0.75rem;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.pry-card-tags {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: auto;
+}
+.pry-tag {
+    font-size: 0.65rem; background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1);
+    padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+}
+
+.pry-card-actions {
+    display: flex; flex-direction: column; gap: 0.5rem;
+}
+.btn-action-pry {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.4);
+    transition: all 0.25s;
+    text-decoration: none;
+}
+.btn-action-pry:hover { border-color: #00d4ff; color: #00d4ff; background: rgba(0,212,255,0.1); transform: scale(1.05); }
+.btn-action-pry.delete:hover { border-color: #ff4d6d; color: #ff4d6d; background: rgba(255,77,109,0.1); }
+
+/* ── Modal ─────────────────────────────────────── */
+.pry-modal-overlay {
+    display:none; position:fixed; inset:0; z-index:9999 !important;
+    background:rgba(0,0,0,.8); backdrop-filter:blur(8px);
+    align-items:center; justify-content:center;
+}
+.pry-modal-overlay.open { display:flex; }
+.pry-modal {
+    background:rgba(18,18,28,.95);
+    border:1px solid rgba(0,212,255,.25); border-radius:16px;
+    box-shadow:0 0 40px rgba(0,212,255,.12);
+    width:min(640px,95vw); max-height:92vh; overflow-y:auto;
+    padding:1.6rem; animation:slideUpPry .2s ease;
+}
+@keyframes slideUpPry {
+    from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)}
+}
+/* ── Icon picker ─────────────────────────────── */
+.p-picker-search {
+    width:100%; background:rgba(255,255,255,.04);
+    border:1px solid rgba(0,212,255,.18); border-radius:8px;
+    padding:.55rem .9rem; color:#fff; font-size:.85rem; outline:none;
+    margin-bottom:.5rem;
+}
+.p-picker-search::placeholder { color:rgba(255,255,255,.35); }
+.p-cat-row { display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.5rem; }
+.p-cat-btn {
+    background:transparent; border:1px solid rgba(255,255,255,.12);
+    border-radius:20px; color:rgba(255,255,255,.5); font-size:.72rem;
+    padding:.28rem .75rem; cursor:pointer; transition:.15s;
+}
+.p-cat-btn:hover,.p-cat-btn.active { border-color:#00d4ff; color:#00d4ff; }
+.p-icon-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(42px,1fr));
+    gap:3px; max-height:200px; overflow-y:auto;
+    background:rgba(8,8,8,.5); border-radius:8px; padding:.5rem;
+}
+.p-icon-item {
+    display:flex; align-items:center; justify-content:center;
+    padding:9px 5px; border-radius:7px; cursor:pointer;
+    border:1px solid transparent; transition:.14s;
+}
+.p-icon-item i { font-size:1.25rem; color:rgba(255,255,255,.85); }
+/* Todos los devicons: forzar gris para los que aparecen negros */
+.p-icon-item i[class*="devicon-"] { color: rgba(255,255,255,0.75); }
+/* Devicons sin versión colored: forzar visible con filtro */
+.p-icon-item i[class*="devicon-"]:not([class*="colored"]) {
+    filter: brightness(0) invert(0.75);
+}
+.p-icon-item:hover { background:rgba(0,212,255,.07); border-color:rgba(0,212,255,.2); }
+.p-icon-item:hover i,.p-icon-item.selected i { color:#00d4ff; filter:brightness(1.15)!important; }
+.p-icon-item.selected { background:rgba(0,212,255,.12); border-color:#00d4ff; }
+.p-preview {
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:rgba(0,212,255,.08); border:1px solid rgba(0,212,255,.25);
+    border-radius:8px; padding:.45rem .9rem;
+    color:#00d4ff; font-weight:600; font-size:.9rem; margin-bottom:.5rem;
+}
+.p-preview i { font-size:1.3rem; }
+.pry-error { color:#ff4d6d; font-size:.8rem; margin-top:.3rem; display:none; }
+</style>
+{% endblock extra_css %}
+
+{% block extra_actions %}{% endblock %}
+
+{% block content %}
+
+{# ── Barra de acciones ──────────────────────────────────── #}
+<div class="d-flex align-items-center justify-content-end gap-2 mb-4 action-bar-responsive">
+    <button onclick="openPryModal()" class="btn-accent">Nuevo proyecto</button>
+    <a href="javascript:void(0)"
+       data-reset-url="{% url 'dashboard_reset_proyectos' %}"
+       data-reset-label="todos los proyectos"
+       onclick="swalConfirmReset(this)"
+       class="btn-ghost" style="border-color:rgba(255,150,0,0.3);color:rgba(255,150,0,0.8);font-size:.8rem;">
+        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+    </a>
+</div>
+
+{# ── Modal inline ───────────────────────────────────── #}
+<div class="pry-modal-overlay" id="pryModalOverlay" onclick="closePryModalOutside(event)">
+  <div class="pry-modal">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h6 class="text-white fw-bold mb-0" id="pryModalTitle">Nuevo Proyecto</h6>
+      <button onclick="closePryModal()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:1.3rem;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <form id="pryForm" onsubmit="submitPry(event)">
+      {% csrf_token %}
+      <input type="hidden" id="pryPk">
+      <input type="hidden" id="pryIconoVal">
+
+      <div class="row g-3">
+        {# ── Ícono ── #}
+        <div class="col-12">
+          <label class="form-label" style="font-size:.82rem;">Ícono representativo</label>
+          <div id="pryPreview" style="display:none;" class="mb-1">
+            <div class="p-preview"><i id="pryPreviewIcon"></i><span id="pryPreviewLabel"></span></div>
+            <button type="button" onclick="clearPryIcon()" style="background:none;border:none;color:rgba(0,212,255,.6);font-size:.78rem;cursor:pointer;padding:0;">
+              <i class="bi bi-x me-1"></i>Cambiar ícono
+            </button>
+          </div>
+          <div id="pryPickerWrap">
+            <input type="text" class="p-picker-search" id="prySearch" placeholder="🔍  Buscar ícono..." oninput="filterPryIcons()">
+            <div class="p-cat-row" id="pryCats">
+              <button class="p-cat-btn active" onclick="filterPryCat('todos',this)" type="button">Todos</button>
+              <button class="p-cat-btn" onclick="filterPryCat('lenguajes',this)" type="button">Lenguajes</button>
+              <button class="p-cat-btn" onclick="filterPryCat('frameworks',this)" type="button">Frameworks</button>
+              <button class="p-cat-btn" onclick="filterPryCat('bases-de-datos',this)" type="button">Bases de datos</button>
+              <button class="p-cat-btn" onclick="filterPryCat('herramientas',this)" type="button">Herramientas</button>
+              <button class="p-cat-btn" onclick="filterPryCat('cloud',this)" type="button">Cloud</button>
+              <button class="p-cat-btn" onclick="filterPryCat('general',this)" type="button">General</button>
+            </div>
+            <div class="p-icon-grid" id="pryIconGrid"></div>
+          </div>
+        </div>
+
+        {# ── Campos ── #}
+        <div class="col-12">
+          <label class="form-label">Título <span class="text-accent">*</span></label>
+          <input type="text" id="pryTitulo" class="form-control" placeholder="Ej: Portafolio Web" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Descripción</label>
+          <textarea id="pryDesc" class="form-control" rows="3" placeholder="Descripción breve del proyecto..."></textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Tecnologías</label>
+          <input type="text" id="pryTecnologias" class="form-control" placeholder="Ej: Python • Django • PostgreSQL">
+          <div class="footer-text mt-1" style="font-size:.75rem;">Separa con • o comas.</div>
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Link GitHub</label>
+          <input type="url" id="pryGithub" class="form-control" placeholder="https://github.com/...">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Orden</label>
+          <input type="number" id="pryOrden" class="form-control" value="0" min="0">
+        </div>
+      </div>
+
+      <div class="pry-error" id="pryError"></div>
+      <div class="d-flex modal-footer-custom justify-content-center gap-2 mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,.06);">
+        <button type="submit" class="btn-accent" id="prySubmitBtn">
+          Guardar
+        </button>
+        <button type="button" onclick="closePryModal()" class="btn-warning-ghost">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Lista de proyectos (Horizontal) ─────────────────── #}
+{% if proyectos %}
+<div id="proyectosGrid" class="pry-grid">
+    {% for p in proyectos %}
+    <div class="pry-card-horizontal" id="pry-card-{{ p.pk }}">
+        <div class="pry-card-left">
+            <i class="{{ p.icono_class }}"></i>
+        </div>
+        <div class="pry-card-body">
+            <h6 class="pry-card-title">{{ p.titulo }}</h6>
+            <p class="pry-card-desc">{{ p.descripcion }}</p>
+            {% if p.tecnologias %}
+            <div class="pry-card-tags">
+                {% for tag in p.tecnologias.split %}
+                <span class="pry-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="pry-card-actions">
+            <button onclick="preparePryEdit(this)"
+                    data-pk="{{ p.pk }}"
+                    data-titulo="{{ p.titulo|escapejs }}"
+                    data-desc="{{ p.descripcion|escapejs }}"
+                    data-tecs="{{ p.tecnologias|escapejs }}"
+                    data-github="{{ p.link_github|escapejs }}"
+                    data-icono="{{ p.icono_class|escapejs }}"
+                    data-orden="{{ p.orden }}"
+                    title="Editar"
+                    class="btn-action-pry">
+                <i class="bi bi-pencil"></i>
+            </button>
+            {% if p.link_github %}
+            <a href="{{ p.link_github }}" target="_blank" title="Ver en GitHub" class="btn-action-pry">
+                <i class="bi bi-github"></i>
+            </a>
+            {% endif %}
+            <button onclick="swalConfirmDelete('{% url 'dashboard_proyecto_eliminar' p.pk %}', '{{ p.titulo|escapejs }}')" 
+                    title="Eliminar"
+                    class="btn-action-pry delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="admin-table mx-auto" id="proyectosGrid" style="max-width:480px;">
+    <div class="text-center py-5" id="pryEmptyState">
+        <i class="bi bi-code-slash fs-1 text-accent opacity-50"></i>
+        <p class="footer-text mt-3">No hay proyectos registrados.</p>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// ── Catálogo de íconos ────────────────────────────────────
+const PRY_ICONS = [
+    { class:'devicon-python-plain colored',         label:'Python',       cat:'lenguajes' },
+    { class:'devicon-javascript-plain colored',     label:'JavaScript',   cat:'lenguajes' },
+    { class:'devicon-typescript-plain colored',     label:'TypeScript',   cat:'lenguajes' },
+    { class:'devicon-java-plain colored',           label:'Java',         cat:'lenguajes' },
+    { class:'devicon-csharp-plain colored',         label:'C#',           cat:'lenguajes' },
+    { class:'devicon-cplusplus-plain colored',      label:'C++',          cat:'lenguajes' },
+    { class:'devicon-go-plain colored',             label:'Go',           cat:'lenguajes' },
+    { class:'devicon-ruby-plain colored',           label:'Ruby',         cat:'lenguajes' },
+    { class:'devicon-php-plain colored',            label:'PHP',          cat:'lenguajes' },
+    { class:'devicon-html5-plain colored',          label:'HTML5',        cat:'lenguajes' },
+    { class:'devicon-css3-plain colored',           label:'CSS3',         cat:'lenguajes' },
+    { class:'devicon-django-plain colored',         label:'Django',       cat:'frameworks' },
+    { class:'devicon-fastapi-plain colored',        label:'FastAPI',      cat:'frameworks' },
+    { class:'devicon-flask-original',               label:'Flask',        cat:'frameworks' },
+    { class:'devicon-react-original colored',       label:'React',        cat:'frameworks' },
+    { class:'devicon-vuejs-plain colored',          label:'Vue.js',       cat:'frameworks' },
+    { class:'devicon-nextjs-plain',                 label:'Next.js',      cat:'frameworks' },
+    { class:'devicon-nodejs-plain colored',         label:'Node.js',      cat:'frameworks' },
+    { class:'devicon-bootstrap-plain colored',      label:'Bootstrap',    cat:'frameworks' },
+    { class:'devicon-tailwindcss-plain colored',    label:'Tailwind',     cat:'frameworks' },
+    { class:'devicon-tensorflow-original colored',  label:'TensorFlow',   cat:'frameworks' },
+    { class:'devicon-pytorch-plain colored',        label:'PyTorch',      cat:'frameworks' },
+    { class:'bi bi-bar-chart-fill',                 label:'Pandas/Data',  cat:'frameworks' },
+    { class:'devicon-postgresql-plain colored',     label:'PostgreSQL',   cat:'bases-de-datos' },
+    { class:'devicon-mysql-plain colored',          label:'MySQL',        cat:'bases-de-datos' },
+    { class:'devicon-mongodb-plain colored',        label:'MongoDB',      cat:'bases-de-datos' },
+    { class:'devicon-redis-plain colored',          label:'Redis',        cat:'bases-de-datos' },
+    { class:'devicon-sqlite-plain colored',         label:'SQLite',       cat:'bases-de-datos' },
+    { class:'devicon-firebase-plain colored',       label:'Firebase',     cat:'bases-de-datos' },
+    { class:'devicon-git-plain colored',            label:'Git',          cat:'herramientas' },
+    { class:'devicon-github-original',              label:'GitHub',       cat:'herramientas' },
+    { class:'devicon-docker-plain colored',         label:'Docker',       cat:'herramientas' },
+    { class:'devicon-figma-plain colored',          label:'Figma',        cat:'herramientas' },
+    { class:'devicon-vscode-plain colored',         label:'VS Code',      cat:'herramientas' },
+    { class:'bi bi-plug-fill',                         label:'REST APIs',    cat:'herramientas' },
+    { class:'devicon-linux-plain colored',          label:'Linux',        cat:'herramientas' },
+    { class:'devicon-amazonwebservices-plain colored', label:'AWS',       cat:'cloud' },
+    { class:'devicon-azure-plain colored',          label:'Azure',        cat:'cloud' },
+    { class:'devicon-googlecloud-plain colored',    label:'GCP',          cat:'cloud' },
+    { class:'devicon-kubernetes-plain colored',     label:'Kubernetes',   cat:'cloud' },
+    { class:'devicon-heroku-plain colored',         label:'Heroku',       cat:'cloud' },
+    { class:'bi bi-shield-lock-fill',               label:'Seguridad',    cat:'general' },
+    { class:'bi bi-phone-fill',                     label:'Móvil',        cat:'general' },
+    { class:'bi bi-globe2',                         label:'Web',          cat:'general' },
+    { class:'bi bi-cpu-fill',                       label:'IA / ML',      cat:'general' },
+    { class:'bi bi-diagram-3-fill',                 label:'Arquitectura', cat:'general' },
+    { class:'bi bi-lightning-charge-fill',          label:'Performance',  cat:'general' },
+    { class:'bi bi-box-seam-fill',                  label:'DevOps',       cat:'general' },
+    { class:'bi bi-graph-up-arrow',                 label:'Analytics',    cat:'general' },
+    { class:'bi bi-terminal-fill',                  label:'CLI',          cat:'general' },
+];
+
+let prySelectedIcon = '';
+let pryCurrentCat   = 'todos';
+const PRY_AJAX_URL  = '{% url "dashboard_proyecto_nueva_ajax" %}';
+const PRY_CSRF      = '{{ csrf_token }}';
+
+function openPryModal() {
+    document.getElementById('pryPk').value       = '';
+    document.getElementById('pryIconoVal').value = '';
+    document.getElementById('pryTitulo').value   = '';
+    document.getElementById('pryDesc').value     = '';
+    document.getElementById('pryTecnologias').value = '';
+    document.getElementById('pryGithub').value   = '';
+    document.getElementById('pryOrden').value    = '0';
+    document.getElementById('pryModalTitle').textContent = 'Nuevo Proyecto';
+    prySelectedIcon = '';
+    document.getElementById('pryPreview').style.display   = 'none';
+    document.getElementById('pryPickerWrap').style.display = '';
+    document.getElementById('pryError').style.display     = 'none';
+    document.getElementById('prySearch').value = '';
+    pryCurrentCat = 'todos';
+    document.querySelectorAll('.p-cat-btn').forEach(b => b.classList.toggle('active', b.textContent === 'Todos'));
+    renderPryIcons(PRY_ICONS);
+    document.getElementById('pryModalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('pryTitulo').focus(), 100);
+}
+function closePryModal() { document.getElementById('pryModalOverlay').classList.remove('open'); }
+function closePryModalOutside(e) { if(e.target===document.getElementById('pryModalOverlay')) closePryModal(); }
+
+function preparePryEdit(btn) {
+    const pk = btn.getAttribute('data-pk');
+    const titulo = btn.getAttribute('data-titulo');
+    const desc = btn.getAttribute('data-desc');
+    const tecs = btn.getAttribute('data-tecs');
+    const github = btn.getAttribute('data-github');
+    const icono = btn.getAttribute('data-icono');
+    const orden = btn.getAttribute('data-orden');
+
+    openPryModal(); // Limpia campos primero
+    document.getElementById('pryModalTitle').textContent = 'Editar Proyecto';
+    document.getElementById('pryPk').value = pk;
+    document.getElementById('pryTitulo').value = titulo;
+    document.getElementById('pryDesc').value = desc;
+    document.getElementById('pryTecnologias').value = tecs;
+    document.getElementById('pryGithub').value = github;
+    document.getElementById('pryOrden').value = orden;
+
+    if (icono) {
+        // Encontrar label del icono si es posible, o usar el class
+        const iconData = PRY_ICONS.find(i => i.class === icono);
+        selectPryIcon(icono, iconData ? iconData.label : 'Icono');
+    }
+}
+
+function renderPryIcons(list) {
+    const g = document.getElementById('pryIconGrid');
+    if (!list.length) { g.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.25);padding:1rem;font-size:.82rem;">Sin resultados</div>'; return; }
+    g.innerHTML = list.map(i=>`
+        <div class="p-icon-item ${prySelectedIcon===i.class?'selected':''}"
+             onclick="selectPryIcon('${i.class}','${i.label}')" title="${i.label}">
+            <i class="${i.class}"></i>
+        </div>`).join('');
+}
+function filterPryIcons() {
+    const q = document.getElementById('prySearch').value.toLowerCase();
+    renderPryIcons(PRY_ICONS.filter(i=>(pryCurrentCat==='todos'||i.cat===pryCurrentCat)&&(!q||i.label.toLowerCase().includes(q))));
+}
+function filterPryCat(cat, btn) {
+    pryCurrentCat = cat;
+    document.querySelectorAll('.p-cat-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); filterPryIcons();
+}
+function selectPryIcon(cls, label) {
+    prySelectedIcon = cls;
+    document.getElementById('pryIconoVal').value   = cls;
+    document.getElementById('pryPreviewIcon').className = cls;
+    document.getElementById('pryPreviewLabel').textContent = label;
+    document.getElementById('pryPreview').style.display    = '';
+    document.getElementById('pryPickerWrap').style.display = 'none';
+}
+function clearPryIcon() {
+    prySelectedIcon = '';
+    document.getElementById('pryIconoVal').value = '';
+    document.getElementById('pryPreview').style.display    = 'none';
+    document.getElementById('pryPickerWrap').style.display = '';
+    renderPryIcons(PRY_ICONS);
+}
+
+async function submitPry(e) {
+    e.preventDefault();
+    const titulo      = document.getElementById('pryTitulo').value.trim();
+    const desc        = document.getElementById('pryDesc').value.trim();
+    const tecnologias = document.getElementById('pryTecnologias').value.trim();
+    const github      = document.getElementById('pryGithub').value.trim();
+    const orden       = document.getElementById('pryOrden').value;
+    const icono       = document.getElementById('pryIconoVal').value;
+    const pk          = document.getElementById('pryPk').value;
+    const errEl       = document.getElementById('pryError');
+
+    if (!titulo) { errEl.textContent='El título es obligatorio.'; errEl.style.display='block'; return; }
+
+    const btn = document.getElementById('prySubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', PRY_CSRF);
+    fd.append('titulo', titulo); fd.append('descripcion', desc);
+    fd.append('icono_class', icono); fd.append('tecnologias', tecnologias);
+    fd.append('link_github', github); fd.append('orden', orden);
+    if (pk) fd.append('pk', pk);
+
+    try {
+        const res  = await fetch(PRY_AJAX_URL, { method:'POST', body:fd });
+        const data = await res.json();
+        if (!data.success) { errEl.textContent=data.error||'Error.'; errEl.style.display='block'; return; }
+        if (data.success) {
+            Toast.fire({
+                icon: 'success', title: `✓ Proyecto ${data.accion} correctamente`
+            });
+            insertOrUpdatePryCard(data);
+            closePryModal();
+        }
+    } catch(err) {
+        errEl.textContent='Error de conexión.'; errEl.style.display='block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML='Guardar';
+    }
+}
+
+function insertOrUpdatePryCard(data) {
+    const cardHTML = `
+    <div class="pry-card-horizontal" id="pry-card-${data.pk}">
+        <div class="pry-card-left">
+            <i class="${data.icono_class}"></i>
+        </div>
+        <div class="pry-card-body">
+            <h6 class="pry-card-title">${data.titulo}</h6>
+            <p class="pry-card-desc">${data.descripcion}</p>
+            ${data.tecnologias ? `
+                <div class="pry-card-tags">
+                    ${data.tecnologias.split(/[ •,]+/).filter(t => t).map(t => `<span class="pry-tag">${t}</span>`).join('')}
+                </div>
+            ` : ''}
+        </div>
+        <div class="pry-card-actions">
+            <button onclick="preparePryEdit(this)"
+                    data-pk="${data.pk}"
+                    data-titulo="${(data.titulo||'').replace(/"/g,'&quot;')}"
+                    data-desc="${(data.descripcion||'').replace(/"/g,'&quot;')}"
+                    data-tecs="${(data.tecnologias||'').replace(/"/g,'&quot;')}"
+                    data-github="${(data.link_github||'').replace(/"/g,'&quot;')}"
+                    data-icono="${(data.icono_class||'').replace(/"/g,'&quot;')}"
+                    data-orden="${data.orden}"
+                    title="Editar"
+                    class="btn-action-pry">
+                <i class="bi bi-pencil"></i>
+            </button>
+            ${data.link_github ? `<a href="${data.link_github}" target="_blank" title="Ver en GitHub" class="btn-action-pry"><i class="bi bi-github"></i></a>` : ''}
+            <button onclick="swalConfirmDelete('${data.delete_url}','${(data.titulo||'').replace(/'/g,"\\'")}')" 
+                    title="Eliminar"
+                    class="btn-action-pry delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>`;
+
+    const grid     = document.getElementById('proyectosGrid');
+    const empty    = document.getElementById('pryEmptyState');
+    const existing = document.getElementById(`pry-card-${data.pk}`);
+
+    if (empty) {
+        grid.outerHTML = `<div id="proyectosGrid" class="pry-grid">${cardHTML}</div>`;
+        return;
+    }
+    if (existing) { existing.outerHTML = cardHTML; }
+    else { grid.insertAdjacentHTML('afterbegin', cardHTML); }
+}
+
+// Inicializar picker
+renderPryIcons(PRY_ICONS);
+</script>
+{% endblock %}

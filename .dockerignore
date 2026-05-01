@@ -1,0 +1,43 @@
+# Control de versiones
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Entorno virtual
+env/
+venv/
+.venv/
+
+# Variables de entorno (se pasa por --env-file o secrets)
+# portafolio/.env   ← NO ignorar, el compose lo necesita
+
+# Base de datos local
+portafolio/db.sqlite3
+
+# Media uploads (se monta como volumen)
+portafolio/media/
+
+# Archivos estáticos generados
+portafolio/staticfiles/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

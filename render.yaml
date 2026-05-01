@@ -1,0 +1,56 @@
+services:
+  # ── Web App (Django + Gunicorn via Docker) ────────────────────
+  - type: web
+    name: portafolio-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free                    # Cambia a "starter" en producción real
+    region: oregon                # us-west-2 (más cercano a Latinoamérica)
+
+    # Variables de entorno en Render Dashboard (no las pongas aquí en texto plano)
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "localhost,127.0.0.1"
+      - key: SECRET_KEY
+        generateValue: true       # Render genera una clave segura automáticamente
+      - key: DB_NAME
+        fromDatabase:
+          name: portafolio-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: portafolio-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: portafolio-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: portafolio-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: portafolio-db
+          property: port
+      # Email (configura estos manualmente en el dashboard)
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      # Superuser Initial Credentials
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+  # ── PostgreSQL Database ───────────────────────────────────────
+databases:
+  - name: portafolio-db
+    plan: free
+    region: oregon

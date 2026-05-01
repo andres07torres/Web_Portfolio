@@ -1,0 +1,486 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Redes Sociales{% endblock %}
+{% block page_title %}Redes Sociales{% endblock %}
+{% block breadcrumb %}Cuenta / Redes Sociales{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Modal overlay (Mismo estilo que Habilidades) ── */
+.red-modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999 !important;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+}
+.red-modal-overlay.open { display: flex; }
+
+.red-modal {
+    background: rgba(18,18,28,0.98);
+    border: 1px solid rgba(0,212,255,0.25);
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(0,212,255,0.2);
+    width: min(580px, 94vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2.2rem;
+    animation: slideUpRed .3s ease;
+}
+@keyframes slideUpRed {
+    from { opacity:0; transform:translateY(30px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Icon picker ── */
+.m-picker-search {
+    width:100%; background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1); border-radius:10px;
+    padding:.7rem 1.1rem; color:#fff; font-size:.9rem; outline:none;
+    margin-bottom:1rem; transition: all .2s;
+}
+.m-picker-search:focus { border-color: #00d4ff; background:rgba(255,255,255,0.08); }
+
+.m-icon-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(50px,1fr));
+    gap:10px; max-height:280px; overflow-y:auto;
+    background:rgba(0,0,0,0.4); border-radius:12px; padding:1.2rem;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.m-icon-item {
+    display:flex; align-items:center; justify-content:center;
+    aspect-ratio: 1; border-radius:10px; cursor:pointer;
+    border:1px solid transparent; transition:.2s;
+    background: rgba(255,255,255,0.03);
+}
+.m-icon-item i { font-size:1.5rem; color:rgba(255,255,255,.5); }
+.m-icon-item:hover { background:rgba(0,212,255,.1); border-color:rgba(0,212,255,.3); }
+.m-icon-item:hover i { color:#00d4ff; transform: scale(1.1); }
+.m-icon-item.selected { background:rgba(0,212,255,.15); border-color:#00d4ff; }
+.m-icon-item.selected i { color:#00d4ff; }
+
+.m-preview-card {
+    display:flex; align-items:center; gap:1rem;
+    background:rgba(0,212,255,.05); border:1px solid rgba(0,212,255,0.2);
+    border-radius:12px; padding:1.2rem; margin-bottom:1.5rem;
+}
+.m-preview-icon {
+    width: 50px; height: 50px; border-radius: 12px;
+    background: rgba(0,212,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; color: #00d4ff;
+    box-shadow: 0 0 15px rgba(0,212,255,0.2);
+}
+
+/* ── Grid y Tarjetas de Redes (Compactas) ───────────────── */
+.red-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 576px) {
+    .red-grid { grid-template-columns: 1fr; }
+}
+
+.red-card-compact {
+    background: rgba(18,18,28,0.5);
+    border: 1px solid rgba(0,212,255,0.12);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.red-card-compact:hover {
+    background: rgba(0,212,255,0.04);
+    border-color: rgba(0,212,255,0.3);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.red-card-icon {
+    width: 46px; height: 46px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    color: var(--accent-color);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.red-card-compact:hover .red-card-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: var(--accent-color);
+    color: #000;
+}
+
+.red-card-info { flex: 1; min-width: 0; }
+.red-card-name {
+    color: #fff; font-weight: 600; font-size: 1.05rem;
+    margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.red-card-tag {
+    font-size: 0.75rem; color: rgba(255,255,255,0.35);
+    display: flex; align-items: center; gap: 0.3rem;
+    text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+}
+
+.red-card-actions {
+    display: flex; gap: 0.5rem; opacity: 0.6; transition: opacity 0.2s;
+}
+.red-card-compact:hover .red-card-actions { opacity: 1; }
+
+.btn-action-small {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.5);
+    transition: all 0.2s;
+}
+.btn-action-small:hover { border-color: #00d4ff; color: #00d4ff; background: rgba(0,212,255,0.1); }
+.btn-action-small.delete:hover { border-color: #ff4d6d; color: #ff4d6d; background: rgba(255,77,109,0.1); }
+</style>
+{% endblock %}
+
+{% block extra_actions %}{% endblock %}
+
+{% block content %}
+
+{# ── Barra de acciones ──────────────────────────────────── #}
+<div class="d-flex align-items-center justify-content-end gap-2 mb-4 action-bar-responsive">
+    <button onclick="openRedModal()" class="btn-accent">Nueva red</button>
+    <a href="javascript:void(0)"
+       data-reset-url="{% url 'dashboard_reset_redes' %}"
+       data-reset-label="todas las redes sociales"
+       onclick="swalConfirmReset(this)"
+       class="btn-ghost" style="border-color:rgba(255,150,0,0.3);color:rgba(255,150,0,0.8);font-size:.8rem;">
+        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+    </a>
+</div>
+
+{% if redes %}
+<div id="redesGrid" class="red-grid animate__animated animate__fadeIn">
+    {% for red in redes %}
+    <div class="red-card-compact" id="red-card-{{ red.pk }}">
+        <div class="red-card-icon">
+            <i class="bi {{ red.icono }}"></i>
+        </div>
+        <div class="red-card-info">
+            <p class="red-card-name">{{ red.nombre }}</p>
+            <span class="red-card-tag"><i class="bi bi-link-45deg"></i> {{ red.url|truncatechars:30 }}</span>
+        </div>
+        <div class="red-card-actions">
+            <button onclick="prepareEdit(this)" 
+                    data-pk="{{ red.pk }}"
+                    data-nombre="{{ red.nombre }}"
+                    data-url="{{ red.url }}"
+                    data-icono="{{ red.icono }}"
+                    data-orden="{{ red.orden }}"
+                    title="Editar"
+                    class="btn-action-small">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button onclick="swalConfirmDelete('{% url 'dashboard_redes_delete' red.pk %}', '{{ red.nombre|escapejs }}')" 
+                    title="Eliminar"
+                    class="btn-action-small delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div id="redesGrid" class="animate__animated animate__fadeIn">
+    <div class="admin-table mx-auto mt-5" id="emptyState" style="max-width:480px;">
+        <div class="text-center py-5">
+            <i class="bi bi-share fs-1 text-accent opacity-50"></i>
+            <p class="footer-text mt-3">No hay redes sociales registradas.</p>
+            <small class="text-white-25 d-block mt-2">Tus redes aparecerán automáticamente en el footer de tu sitio.</small>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# ── Modal Custom ── #}
+<div class="red-modal-overlay" id="redModalOverlay" onclick="closeRedModalOutside(event)">
+    <div class="red-modal" id="redModal" onclick="event.stopPropagation()">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="text-white fw-bold mb-0" id="redModalTitle">Nueva Red Social</h5>
+            <button onclick="closeRedModal()" class="btn-close btn-close-white opacity-50"></button>
+        </div>
+
+        <form id="redForm" onsubmit="submitRed(event)">
+            {% csrf_token %}
+            <input type="hidden" id="redPk">
+            <input type="hidden" id="redIcono">
+            <input type="hidden" id="redNombre">
+
+            <div class="mb-4">
+                <label class="form-label">Enlace directo (URL)</label>
+                <input type="url" id="redUrl" class="form-control" placeholder="https://..." required>
+            </div>
+
+            {# Preview / Icon Picker #}
+            <div id="redPreview" style="display:none;">
+                <label class="form-label">Red Seleccionada</label>
+                <div class="m-preview-card">
+                    <div class="m-preview-icon">
+                        <i id="redPreviewIcon"></i>
+                    </div>
+                    <div>
+                        <div class="text-white fw-bold mb-0" id="redPreviewLabel"></div>
+                        <button type="button" onclick="clearRedIcon()" class="btn btn-link text-accent p-0 btn-sm text-decoration-none small">
+                            Cambiar red
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="redPickerWrap">
+                <label class="form-label mb-2">Selecciona una Red</label>
+                <input type="text" class="m-picker-search" id="redSearch" placeholder="🔍  Filtrar redes populares..." oninput="filterIcons()">
+                <div class="m-icon-grid" id="redIconGrid"></div>
+            </div>
+
+            <div class="mt-4">
+                <label class="form-label">Prioridad (Orden)</label>
+                <input type="number" id="redOrden" class="form-control" style="max-width: 140px;" value="0">
+            </div>
+
+            <div class="m-error" id="redError"></div>
+            <div class="d-flex modal-footer-custom justify-content-center gap-2 mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,.06);">
+                <button type="submit" class="btn-accent" id="redSubmitBtn">
+                    Guardar
+                </button>
+                <button type="button" onclick="closeRedModal()" class="btn-warning-ghost">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const SOCIAL_ICONS = [
+    { class:'bi-facebook',    label:'Facebook' },
+    { class:'bi-instagram',   label:'Instagram' },
+    { class:'bi-linkedin',    label:'LinkedIn' },
+    { class:'bi-twitter-x',   label:'X (Twitter)' },
+    { class:'bi-github',      label:'GitHub' },
+    { class:'bi-youtube',     label:'YouTube' },
+    { class:'bi-tiktok',      label:'TikTok' },
+    { class:'bi-whatsapp',    label:'WhatsApp' },
+    { class:'bi-telegram',    label:'Telegram' },
+    { class:'bi-discord',     label:'Discord' },
+    { class:'bi-twitch',      label:'Twitch' },
+    { class:'bi-reddit',      label:'Reddit' },
+    { class:'bi-medium',      label:'Medium' },
+    { class:'bi-behance',     label:'Behance' },
+    { class:'bi-dribbble',    label:'Dribbble' },
+    { class:'bi-spotify',     label:'Spotify' },
+    { class:'bi-link-45deg',  label:'Sitio Web' },
+    { class:'bi-envelope',    label:'Email' }
+];
+
+let selectedIcon = '';
+const SAVE_AJAX_URL = '{% url "dashboard_redes_save_ajax" %}';
+const CSRF_TOKEN = '{{ csrf_token }}';
+
+// ── Lógica del Modal ──
+function openRedModal() {
+    resetForm();
+    document.getElementById('redModalTitle').innerText = 'Añadir Nueva Red Social';
+    document.getElementById('redModalOverlay').classList.add('open');
+    renderIcons(SOCIAL_ICONS);
+    setTimeout(() => document.getElementById('redSearch').focus(), 100);
+}
+
+function closeRedModal() {
+    document.getElementById('redModalOverlay').classList.remove('open');
+}
+
+function closeRedModalOutside(e) {
+    if (e.target.id === 'redModalOverlay') closeRedModal();
+}
+
+function resetForm() {
+    document.getElementById('redPk').value = '';
+    document.getElementById('redNombre').value = '';
+    document.getElementById('redUrl').value = '';
+    document.getElementById('redIcono').value = '';
+    document.getElementById('redOrden').value = '0';
+    document.getElementById('redSearch').value = '';
+    clearRedIcon();
+    document.getElementById('redError').style.display = 'none';
+}
+
+function prepareEdit(btn) {
+    const pk = btn.getAttribute('data-pk');
+    const nombre = btn.getAttribute('data-nombre');
+    const url = btn.getAttribute('data-url');
+    const icono = btn.getAttribute('data-icono');
+    const orden = btn.getAttribute('data-orden');
+    
+    resetForm();
+    document.getElementById('redModalTitle').innerText = 'Editar Red Social';
+    document.getElementById('redPk').value = pk;
+    document.getElementById('redNombre').value = nombre;
+    document.getElementById('redUrl').value = url;
+    document.getElementById('redOrden').value = orden;
+    
+    selectIcon(icono, nombre.split(' ')[0] || 'Social');
+    document.getElementById('redModalOverlay').classList.add('open');
+}
+
+// ── Picker ──
+function renderIcons(list) {
+    const grid = document.getElementById('redIconGrid');
+    if (!list.length) {
+        grid.innerHTML = '<div class="col-12 py-4 text-center text-white-50 small">Sin resultados</div>';
+        return;
+    }
+    grid.innerHTML = list.map(i => `
+        <div class="m-icon-item ${selectedIcon === i.class ? 'selected' : ''}" 
+             onclick="selectIcon('${i.class}', '${i.label}')" 
+             title="${i.label}">
+            <i class="bi ${i.class}"></i>
+        </div>
+    `).join('');
+}
+
+function filterIcons() {
+    const q = document.getElementById('redSearch').value.toLowerCase();
+    const filtered = SOCIAL_ICONS.filter(i => i.label.toLowerCase().includes(q));
+    renderIcons(filtered);
+}
+
+function selectIcon(cls, label) {
+    selectedIcon = cls;
+    document.getElementById('redIcono').value = cls;
+    document.getElementById('redPreviewIcon').className = 'bi ' + cls;
+    document.getElementById('redPreviewLabel').innerText = label;
+    document.getElementById('redPreview').style.display = 'block';
+    document.getElementById('redPickerWrap').style.display = 'none';
+    
+    const nameInput = document.getElementById('redNombre');
+    if (!nameInput.value) nameInput.value = label;
+}
+
+function clearRedIcon() {
+    selectedIcon = '';
+    document.getElementById('redIcono').value = '';
+    document.getElementById('redPreview').style.display = 'none';
+    document.getElementById('redPickerWrap').style.display = 'block';
+    renderIcons(SOCIAL_ICONS);
+}
+
+// ── AJAX Save ──
+async function submitRed(e) {
+    e.preventDefault();
+    const pk = document.getElementById('redPk').value;
+    const nombre = document.getElementById('redNombre').value;
+    const url = document.getElementById('redUrl').value;
+    const icono = document.getElementById('redIcono').value;
+    const orden = document.getElementById('redOrden').value;
+    const errEl = document.getElementById('redError');
+
+    if (!icono) {
+        errEl.innerText = '⚠️ Selecciona un icono.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const btn = document.getElementById('redSubmitBtn');
+    btn.disabled = true;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Guardando...';
+
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', CSRF_TOKEN);
+    fd.append('nombre', nombre);
+    fd.append('url', url);
+    fd.append('icono', icono);
+    fd.append('orden', orden);
+    if (pk) fd.append('pk', pk);
+
+    try {
+        const res = await fetch(SAVE_AJAX_URL, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            Toast.fire({
+                icon: 'success', title: `✓ Red ${data.accion} correctamente`
+            });
+            insertOrUpdateRedCard(data);
+            closeRedModal();
+        } else {
+            errEl.innerText = data.error || 'Error.';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        }
+    } catch {
+        errEl.innerText = 'Error de conexión.';
+        errEl.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+    }
+}
+
+function insertOrUpdateRedCard(data) {
+    const cardHTML = `
+    <div class="red-card-compact" id="red-card-${data.pk}">
+        <div class="red-card-icon">
+            <i class="bi ${data.icono}"></i>
+        </div>
+        <div class="red-card-info">
+            <p class="red-card-name">${data.nombre}</p>
+            <span class="red-card-tag"><i class="bi bi-link-45deg"></i> ${data.url}</span>
+        </div>
+        <div class="red-card-actions">
+            <button onclick="prepareEdit(this)" 
+                    data-pk="${data.pk}"
+                    data-nombre="${(data.nombre||'').replace(/"/g,'&quot;')}"
+                    data-url="${(data.url||'').replace(/"/g,'&quot;')}"
+                    data-icono="${(data.icono||'').replace(/"/g,'&quot;')}"
+                    data-orden="${data.orden}"
+                    title="Editar"
+                    class="btn-action-small">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button onclick="swalConfirmDelete('${data.delete_url}','${(data.nombre||'').replace(/'/g,"\\'")}')" 
+                    title="Eliminar"
+                    class="btn-action-small delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>`;
+
+    const grid = document.getElementById('redesGrid');
+    const empty = document.getElementById('emptyState');
+    const existing = document.getElementById(`red-card-${data.pk}`);
+
+    if (empty) {
+        grid.innerHTML = cardHTML;
+        grid.classList.remove('animate__fadeIn');
+        void grid.offsetWidth; // Trigger reflow
+        grid.classList.add('animate__fadeIn');
+        return;
+    }
+
+    if (existing) {
+        existing.outerHTML = cardHTML;
+    } else {
+        grid.insertAdjacentHTML('afterbegin', cardHTML);
+    }
+}
+</script>
+{% endblock %}

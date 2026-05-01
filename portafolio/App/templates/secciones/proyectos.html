@@ -1,0 +1,41 @@
+<section id="proyectos" class="py-5">
+    <div class="container">
+        <div class="mb-5">
+            <h2 class="display-5 fw-bold mb-2">Mis <span class="text-accent">Proyectos</span></h2>
+            <p class="footer-text">Soluciones técnicas y desarrollo de software.</p>
+        </div>
+
+        <div class="row g-4">
+            {% if proyectos %}
+                {% for proyecto in proyectos %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="p-4 h-100 transition-up glass-card">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <i class="{{ proyecto.icono_class }} fs-1 text-accent"></i>
+                                <div class="social-links">
+                                    {% if proyecto.link_github %}
+                                        <a href="{{ proyecto.link_github }}" target="_blank" class="icon-social">
+                                            <i class="bi bi-github"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <h4 class="text-white fw-bold h5">{{ proyecto.titulo }}</h4>
+                            <p class="footer-text small">{{ proyecto.descripcion }}</p>
+                            <div class="mt-3">
+                                <small class="text-accent fw-medium">
+                                    {{ proyecto.tecnologias }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-white-50">Próximamente más proyectos dinámicos...</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</section>

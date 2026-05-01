@@ -1,0 +1,340 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Experiencia{% endblock %}
+{% block page_title %}Experiencia Laboral{% endblock %}
+{% block breadcrumb %}Contenido → Experiencia{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Grid y Tarjetas de Experiencia (Horizontal) ───────────────── */
+.exp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 1.25rem;
+}
+
+@media (max-width: 991px) {
+    .exp-grid { grid-template-columns: 1fr; }
+}
+
+.exp-card-horizontal {
+    background: rgba(18,18,28,0.5);
+    border: 1px solid rgba(0,212,255,0.12);
+    border-radius: 16px;
+    padding: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    gap: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.exp-card-horizontal:hover {
+    background: rgba(0,212,255,0.04);
+    border-color: rgba(0,212,255,0.4);
+    transform: translateX(6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.exp-card-left {
+    flex-shrink: 0;
+    width: 60px; height: 60px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    color: var(--accent-color);
+    transition: all 0.4s ease;
+}
+
+.exp-card-horizontal:hover .exp-card-left {
+    transform: scale(1.1) rotate(-8deg);
+    background: var(--accent-color);
+    color: #000;
+}
+
+.exp-card-body { flex: 1; min-width: 0; }
+.exp-card-cargo {
+    color: #fff; font-weight: 700; font-size: 1.1rem;
+    margin: 0 0 0.2rem;
+}
+.exp-card-company {
+    font-size: 0.85rem; color: var(--accent-color);
+    font-weight: 600; margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.exp-card-period {
+    font-size: 0.72rem; color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 10px; border-radius: 20px; display: inline-block;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.exp-card-actions {
+    display: flex; flex-direction: column; gap: 0.5rem;
+}
+.btn-action-exp {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.4);
+    transition: all 0.25s;
+}
+.btn-action-exp:hover { border-color: #00d4ff; color: #00d4ff; background: rgba(0,212,255,0.1); transform: scale(1.05); }
+.btn-action-exp.delete:hover { border-color: #ff4d6d; color: #ff4d6d; background: rgba(255,77,109,0.1); }
+
+.exp-modal-overlay {
+    display:none; position:fixed; inset:0; z-index:9999 !important;
+    background:rgba(0,0,0,.8); backdrop-filter:blur(8px);
+    align-items:center; justify-content:center;
+}
+.exp-modal-overlay.open { display:flex; }
+.exp-modal {
+    background:rgba(18,18,28,.95);
+    border:1px solid rgba(0,212,255,.25); border-radius:16px;
+    box-shadow:0 0 40px rgba(0,212,255,.12);
+    width:min(600px,94vw); max-height:90vh; overflow-y:auto;
+    padding:1.6rem; animation:slideUpExp .2s ease;
+}
+@keyframes slideUpExp {
+    from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)}
+}
+.exp-error { color:#ff4d6d; font-size:.8rem; margin-top:.3rem; display:none; }
+</style>
+{% endblock extra_css %}
+
+
+{% block extra_actions %}{% endblock %}
+
+{% block content %}
+
+{# ── Barra de acciones ──────────────────────────────────── #}
+<div class="d-flex align-items-center justify-content-end gap-2 mb-4 action-bar-responsive">
+    <button onclick="openExpModal()" class="btn-accent">Nueva experiencia</button>
+    <a href="javascript:void(0)"
+       data-reset-url="{% url 'dashboard_reset_experiencias' %}"
+       data-reset-label="toda la experiencia laboral"
+       onclick="swalConfirmReset(this)"
+       class="btn-ghost" style="border-color:rgba(255,150,0,0.3);color:rgba(255,150,0,0.8);font-size:.8rem;">
+        <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar
+    </a>
+</div>
+
+{# ── Modal inline ─────────────────────────────────────── #}
+<div class="exp-modal-overlay" id="expModalOverlay" onclick="closeExpModalOutside(event)">
+  <div class="exp-modal">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h6 class="text-white fw-bold mb-0" id="expModalTitle">Nueva Experiencia</h6>
+      <button onclick="closeExpModal()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:1.3rem;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <form id="expForm" onsubmit="submitExp(event)">
+      {% csrf_token %}
+      <input type="hidden" id="expPk">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Cargo / Puesto <span class="text-accent">*</span></label>
+          <input type="text" id="expCargo" class="form-control" placeholder="Ej: Desarrollador Backend" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Empresa / Institución <span class="text-accent">*</span></label>
+          <input type="text" id="expEmpresa" class="form-control" placeholder="Ej: Varios Clientes" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Período <span class="text-accent">*</span></label>
+          <input type="text" id="expPeriodo" class="form-control" placeholder="Ej: Ene 2025 - Presente" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Orden</label>
+          <input type="number" id="expOrden" class="form-control" value="0" min="0">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Descripción / Logros <span class="text-accent">*</span></label>
+          <textarea id="expDesc" class="form-control" rows="5"
+            placeholder="Describe tus responsabilidades. Puedes usar HTML: &lt;ul&gt;&lt;li&gt;Logro...&lt;/li&gt;&lt;/ul&gt;"></textarea>
+          <div class="footer-text mt-1" style="font-size:.75rem;">
+            Puedes usar HTML como <code style="color:var(--accent-color)">&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;</code>
+          </div>
+        </div>
+      </div>
+      <div class="exp-error" id="expError"></div>
+      <div class="d-flex modal-footer-custom justify-content-center gap-2 mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,.06);">
+        <button type="submit" class="btn-accent" id="expSubmitBtn">
+          Guardar
+        </button>
+        <button type="button" onclick="closeExpModal()" class="btn-warning-ghost">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Lista de experiencias (Horizontal) ─────────────────── #}
+{% if experiencias %}
+<div id="experienciasGrid" class="exp-grid">
+    {% for exp in experiencias %}
+    <div class="exp-card-horizontal" id="exp-card-{{ exp.pk }}">
+        <div class="exp-card-left">
+            <i class="bi bi-briefcase"></i>
+        </div>
+        <div class="exp-card-body">
+            <h6 class="exp-card-cargo">{{ exp.cargo }}</h6>
+            <div class="exp-card-company"><i class="bi bi-building"></i> {{ exp.empresa }}</div>
+            <div class="exp-card-period">{{ exp.periodo }}</div>
+        </div>
+        <div class="exp-card-actions">
+            <button onclick="prepareExpEdit(this)"
+                    data-pk="{{ exp.pk }}"
+                    data-cargo="{{ exp.cargo|escapejs }}"
+                    data-empresa="{{ exp.empresa|escapejs }}"
+                    data-periodo="{{ exp.periodo|escapejs }}"
+                    data-desc="{{ exp.descripcion|escapejs }}"
+                    data-orden="{{ exp.orden }}"
+                    title="Editar"
+                    class="btn-action-exp">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button onclick="swalConfirmDelete('{% url 'dashboard_experiencia_eliminar' exp.pk %}', '{{ exp.cargo|escapejs }}')" 
+                    title="Eliminar"
+                    class="btn-action-exp delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="admin-table mx-auto" id="experienciasGrid" style="max-width:480px;">
+    <div class="text-center py-5" id="expEmptyState">
+        <i class="bi bi-briefcase fs-1 text-accent opacity-50"></i>
+        <p class="footer-text mt-3">No hay experiencias registradas.</p>
+    </div>
+</div>
+{% endif %}
+
+<script>
+const EXP_AJAX_URL = '{% url "dashboard_experiencia_nueva_ajax" %}';
+const EXP_CSRF     = '{{ csrf_token }}';
+
+function openExpModal() {
+    document.getElementById('expPk').value       = '';
+    document.getElementById('expCargo').value    = '';
+    document.getElementById('expEmpresa').value  = '';
+    document.getElementById('expPeriodo').value  = '';
+    document.getElementById('expDesc').value     = '';
+    document.getElementById('expOrden').value    = '0';
+    document.getElementById('expModalTitle').textContent = 'Nueva Experiencia';
+    document.getElementById('expError').style.display = 'none';
+    document.getElementById('expModalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('expCargo').focus(), 100);
+}
+function closeExpModal() {
+    document.getElementById('expModalOverlay').classList.remove('open');
+}
+
+function prepareExpEdit(btn) {
+    const pk = btn.getAttribute('data-pk');
+    const cargo = btn.getAttribute('data-cargo');
+    const empresa = btn.getAttribute('data-empresa');
+    const periodo = btn.getAttribute('data-periodo');
+    const desc    = btn.getAttribute('data-desc');
+    const orden   = btn.getAttribute('data-orden');
+
+    openExpModal(); // Limpia campos primero
+    document.getElementById('expModalTitle').textContent = 'Editar Experiencia';
+    document.getElementById('expPk').value = pk;
+    document.getElementById('expCargo').value = cargo;
+    document.getElementById('expEmpresa').value = empresa;
+    document.getElementById('expPeriodo').value = periodo;
+    document.getElementById('expDesc').value = desc;
+    document.getElementById('expOrden').value = orden;
+}
+
+function closeExpModalOutside(e) {
+    if (e.target === document.getElementById('expModalOverlay')) closeExpModal();
+}
+
+async function submitExp(e) {
+    e.preventDefault();
+    const cargo   = document.getElementById('expCargo').value.trim();
+    const empresa = document.getElementById('expEmpresa').value.trim();
+    const periodo = document.getElementById('expPeriodo').value.trim();
+    const desc    = document.getElementById('expDesc').value.trim();
+    const orden   = document.getElementById('expOrden').value;
+    const pk      = document.getElementById('expPk').value;
+    const errEl   = document.getElementById('expError');
+
+    if (!cargo) { errEl.textContent='El cargo es obligatorio.'; errEl.style.display='block'; return; }
+
+    const btn = document.getElementById('expSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', EXP_CSRF);
+    fd.append('cargo', cargo); fd.append('empresa', empresa);
+    fd.append('periodo', periodo); fd.append('descripcion', desc);
+    fd.append('orden', orden);
+    if (pk) fd.append('pk', pk);
+
+    try {
+        const res  = await fetch(EXP_AJAX_URL, { method:'POST', body:fd });
+        const data = await res.json();
+        if (data.success) {
+            Toast.fire({
+                icon: 'success', title: `✓ Experiencia ${data.accion} correctamente`
+            });
+            insertOrUpdateExpCard(data);
+            closeExpModal();
+        }
+    } catch(err) {
+        errEl.textContent='Error de conexión.'; errEl.style.display='block';
+    } finally {
+        btn.disabled=false;
+        btn.innerHTML='Guardar';
+    }
+}
+
+function insertOrUpdateExpCard(data) {
+    const cardHTML = `
+    <div class="exp-card-horizontal" id="exp-card-${data.pk}">
+        <div class="exp-card-left">
+            <i class="bi bi-briefcase"></i>
+        </div>
+        <div class="exp-card-body">
+            <h6 class="exp-card-cargo">${data.cargo}</h6>
+            <div class="exp-card-company"><i class="bi bi-building"></i> ${data.empresa}</div>
+            <div class="exp-card-period">${data.periodo}</div>
+        </div>
+        <div class="exp-card-actions">
+            <button onclick="prepareExpEdit(this)"
+                    data-pk="${data.pk}"
+                    data-cargo="${(data.cargo||'').replace(/"/g,'&quot;')}"
+                    data-empresa="${(data.empresa||'').replace(/"/g,'&quot;')}"
+                    data-periodo="${(data.periodo||'').replace(/"/g,'&quot;')}"
+                    data-desc="${(data.descripcion||'').replace(/"/g,'&quot;')}"
+                    data-orden="${data.orden}"
+                    title="Editar"
+                    class="btn-action-exp">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button onclick="swalConfirmDelete('${data.delete_url}','${(data.cargo||'').replace(/'/g,"\\'")}')" 
+                    title="Eliminar"
+                    class="btn-action-exp delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    </div>`;
+
+    const grid     = document.getElementById('experienciasGrid');
+    const empty    = document.getElementById('expEmptyState');
+    const existing = document.getElementById(`exp-card-${data.pk}`);
+
+    if (empty) {
+        grid.outerHTML = `<div id="experienciasGrid" class="exp-grid">${cardHTML}</div>`;
+        return;
+    }
+    if (existing) { existing.outerHTML = cardHTML; }
+    else { grid.insertAdjacentHTML('afterbegin', cardHTML); }
+}
+</script>
+{% endblock %}
