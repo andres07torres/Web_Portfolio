@@ -5,6 +5,7 @@ sqlparse==0.5.5
 
 # Base de datos PostgreSQL
 psycopg2-binary==2.9.11
+dj-database-url==2.3.0
 
 # Variables de entorno
 python-dotenv==1.2.2
