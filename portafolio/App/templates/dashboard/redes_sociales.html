@@ -224,8 +224,8 @@
             <input type="hidden" id="redNombre">
 
             <div class="mb-4">
-                <label class="form-label">Enlace directo (URL)</label>
-                <input type="url" id="redUrl" class="form-control" placeholder="https://..." required>
+                <label class="form-label" id="urlLabel">Enlace directo (URL)</label>
+                <input type="text" id="redUrl" class="form-control" placeholder="https://..." required>
             </div>
 
             {# Preview / Icon Picker #}
@@ -325,7 +325,7 @@ function resetForm() {
 function prepareEdit(btn) {
     const pk = btn.getAttribute('data-pk');
     const nombre = btn.getAttribute('data-nombre');
-    const url = btn.getAttribute('data-url');
+    let url = btn.getAttribute('data-url');
     const icono = btn.getAttribute('data-icono');
     const orden = btn.getAttribute('data-orden');
     
@@ -333,6 +333,12 @@ function prepareEdit(btn) {
     document.getElementById('redModalTitle').innerText = 'Editar Red Social';
     document.getElementById('redPk').value = pk;
     document.getElementById('redNombre').value = nombre;
+
+    // Si es WhatsApp, extraemos solo el número para mostrarlo en el input
+    if (icono === 'bi-whatsapp' && url.includes('wa.me/')) {
+        url = url.split('wa.me/')[1].split('?')[0]; // Extrae el número
+    }
+    
     document.getElementById('redUrl').value = url;
     document.getElementById('redOrden').value = orden;
     
@@ -372,6 +378,19 @@ function selectIcon(cls, label) {
     
     const nameInput = document.getElementById('redNombre');
     if (!nameInput.value) nameInput.value = label;
+
+    // Lógica dinámica para WhatsApp
+    const urlInput = document.getElementById('redUrl');
+    const urlLabel = document.getElementById('urlLabel');
+    if (cls === 'bi-whatsapp') {
+        urlLabel.innerText = 'Número de WhatsApp (con código de país)';
+        urlInput.placeholder = 'Ej: 573102223344';
+        urlInput.type = 'text';
+    } else {
+        urlLabel.innerText = 'Enlace directo (URL)';
+        urlInput.placeholder = 'https://...';
+        urlInput.type = 'url';
+    }
 }
 
 function clearRedIcon() {
@@ -387,9 +406,15 @@ async function submitRed(e) {
     e.preventDefault();
     const pk = document.getElementById('redPk').value;
     const nombre = document.getElementById('redNombre').value;
-    const url = document.getElementById('redUrl').value;
+    let url = document.getElementById('redUrl').value;
     const icono = document.getElementById('redIcono').value;
     const orden = document.getElementById('redOrden').value;
+
+    // Si es WhatsApp y no tiene protocolo, formatear como URL wa.me
+    if (icono === 'bi-whatsapp' && !url.includes('://')) {
+        const cleanNumber = url.replace(/\D/g, ''); // Solo números
+        url = `https://wa.me/${cleanNumber}`;
+    }
     const errEl = document.getElementById('redError');
 
     if (!icono) {
