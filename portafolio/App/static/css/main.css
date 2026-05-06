@@ -316,6 +316,15 @@ html {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent any internal content from leaking out */
+}
+
+.tech-stack {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
 }
 
 section {
