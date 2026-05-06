@@ -369,6 +369,8 @@ def dashboard_proyecto_ajax(request, pk=None):
             'descripcion': obj.descripcion,
             'icono_class': obj.icono_class,
             'tecnologias': obj.tecnologias,
+            'link_github': obj.link_github,
+            'link_despliegue': obj.link_despliegue,
             'orden': obj.orden,
             'edit_url':   reverse('dashboard_proyecto_editar', args=[obj.pk]),
             'delete_url': reverse('dashboard_proyecto_eliminar', args=[obj.pk]),

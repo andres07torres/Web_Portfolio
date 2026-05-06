@@ -14,8 +14,13 @@
                                 <i class="{{ proyecto.icono_class }} fs-1 text-accent"></i>
                                 <div class="social-links">
                                     {% if proyecto.link_github %}
-                                        <a href="{{ proyecto.link_github }}" target="_blank" class="icon-social">
+                                        <a href="{{ proyecto.link_github }}" target="_blank" class="icon-social" title="Ver Código">
                                             <i class="bi bi-github"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if proyecto.link_despliegue %}
+                                        <a href="{{ proyecto.link_despliegue }}" target="_blank" class="icon-social ms-2" title="Ver Proyecto en Vivo">
+                                            <i class="bi bi-globe"></i>
                                         </a>
                                     {% endif %}
                                 </div>

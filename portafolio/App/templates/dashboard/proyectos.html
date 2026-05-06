@@ -218,9 +218,13 @@
           <input type="text" id="pryTecnologias" class="form-control" placeholder="Ej: Python • Django • PostgreSQL">
           <div class="footer-text mt-1" style="font-size:.75rem;">Separa con • o comas.</div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-6">
           <label class="form-label">Link GitHub</label>
           <input type="url" id="pryGithub" class="form-control" placeholder="https://github.com/...">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Link Render / Despliegue</label>
+          <input type="url" id="pryDespliegue" class="form-control" placeholder="https://mi-app.render.com">
         </div>
         <div class="col-md-4">
           <label class="form-label">Orden</label>
@@ -261,11 +265,12 @@
         <div class="pry-card-actions">
             <button onclick="preparePryEdit(this)"
                     data-pk="{{ p.pk }}"
-                    data-titulo="{{ p.titulo|escapejs }}"
-                    data-desc="{{ p.descripcion|escapejs }}"
-                    data-tecs="{{ p.tecnologias|escapejs }}"
-                    data-github="{{ p.link_github|escapejs }}"
-                    data-icono="{{ p.icono_class|escapejs }}"
+                    data-titulo="{{ p.titulo }}"
+                    data-desc="{{ p.descripcion }}"
+                    data-tecs="{{ p.tecnologias }}"
+                    data-github="{{ p.link_github }}"
+                    data-despliegue="{{ p.link_despliegue }}"
+                    data-icono="{{ p.icono_class }}"
                     data-orden="{{ p.orden }}"
                     title="Editar"
                     class="btn-action-pry">
@@ -274,6 +279,11 @@
             {% if p.link_github %}
             <a href="{{ p.link_github }}" target="_blank" title="Ver en GitHub" class="btn-action-pry">
                 <i class="bi bi-github"></i>
+            </a>
+            {% endif %}
+            {% if p.link_despliegue %}
+            <a href="{{ p.link_despliegue }}" target="_blank" title="Ver Despliegue" class="btn-action-pry">
+                <i class="bi bi-globe"></i>
             </a>
             {% endif %}
             <button onclick="swalConfirmDelete('{% url 'dashboard_proyecto_eliminar' p.pk %}', '{{ p.titulo|escapejs }}')" 
@@ -361,6 +371,7 @@ function openPryModal() {
     document.getElementById('pryDesc').value     = '';
     document.getElementById('pryTecnologias').value = '';
     document.getElementById('pryGithub').value   = '';
+    document.getElementById('pryDespliegue').value = '';
     document.getElementById('pryOrden').value    = '0';
     document.getElementById('pryModalTitle').textContent = 'Nuevo Proyecto';
     prySelectedIcon = '';
@@ -383,6 +394,7 @@ function preparePryEdit(btn) {
     const desc = btn.getAttribute('data-desc');
     const tecs = btn.getAttribute('data-tecs');
     const github = btn.getAttribute('data-github');
+    const despliegue = btn.getAttribute('data-despliegue');
     const icono = btn.getAttribute('data-icono');
     const orden = btn.getAttribute('data-orden');
 
@@ -393,6 +405,7 @@ function preparePryEdit(btn) {
     document.getElementById('pryDesc').value = desc;
     document.getElementById('pryTecnologias').value = tecs;
     document.getElementById('pryGithub').value = github;
+    document.getElementById('pryDespliegue').value = despliegue;
     document.getElementById('pryOrden').value = orden;
 
     if (icono) {
@@ -442,6 +455,7 @@ async function submitPry(e) {
     const desc        = document.getElementById('pryDesc').value.trim();
     const tecnologias = document.getElementById('pryTecnologias').value.trim();
     const github      = document.getElementById('pryGithub').value.trim();
+    const despliegue   = document.getElementById('pryDespliegue').value.trim();
     const orden       = document.getElementById('pryOrden').value;
     const icono       = document.getElementById('pryIconoVal').value;
     const pk          = document.getElementById('pryPk').value;
@@ -457,7 +471,9 @@ async function submitPry(e) {
     fd.append('csrfmiddlewaretoken', PRY_CSRF);
     fd.append('titulo', titulo); fd.append('descripcion', desc);
     fd.append('icono_class', icono); fd.append('tecnologias', tecnologias);
-    fd.append('link_github', github); fd.append('orden', orden);
+    fd.append('link_github', github);
+    fd.append('link_despliegue', despliegue);
+    fd.append('orden', orden);
     if (pk) fd.append('pk', pk);
 
     try {
@@ -501,6 +517,7 @@ function insertOrUpdatePryCard(data) {
                     data-desc="${(data.descripcion||'').replace(/"/g,'&quot;')}"
                     data-tecs="${(data.tecnologias||'').replace(/"/g,'&quot;')}"
                     data-github="${(data.link_github||'').replace(/"/g,'&quot;')}"
+                    data-despliegue="${(data.link_despliegue||'').replace(/"/g,'&quot;')}"
                     data-icono="${(data.icono_class||'').replace(/"/g,'&quot;')}"
                     data-orden="${data.orden}"
                     title="Editar"
@@ -508,6 +525,7 @@ function insertOrUpdatePryCard(data) {
                 <i class="bi bi-pencil"></i>
             </button>
             ${data.link_github ? `<a href="${data.link_github}" target="_blank" title="Ver en GitHub" class="btn-action-pry"><i class="bi bi-github"></i></a>` : ''}
+            ${data.link_despliegue ? `<a href="${data.link_despliegue}" target="_blank" title="Ver Despliegue" class="btn-action-pry"><i class="bi bi-globe"></i></a>` : ''}
             <button onclick="swalConfirmDelete('${data.delete_url}','${(data.titulo||'').replace(/'/g,"\\'")}')" 
                     title="Eliminar"
                     class="btn-action-pry delete">

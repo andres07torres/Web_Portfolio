@@ -77,9 +77,13 @@
                 <input type="text" name="tecnologias" class="form-control" placeholder="Ej: Python • Django • AI" value="{{ form.tecnologias.value|default:'' }}">
                 <div class="footer-text mt-1" style="font-size:.76rem;">Separa con • o comas.</div>
             </div>
-            <div class="col-12">
+            <div class="col-md-6">
                 <label class="form-label">Enlace GitHub (opcional)</label>
                 <input type="url" name="link_github" class="form-control" placeholder="https://github.com/..." value="{{ form.link_github.value|default:'' }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Enlace Render / Despliegue (opcional)</label>
+                <input type="url" name="link_despliegue" class="form-control" placeholder="https://mi-app.render.com" value="{{ form.link_despliegue.value|default:'' }}">
             </div>
         </div>
         <div class="d-flex modal-footer-custom align-items-center justify-content-center gap-2 mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,0.06);">
