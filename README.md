@@ -102,4 +102,4 @@ Web_Portafolio/
 Este proyecto está bajo la licencia MIT. Siéntete libre de usarlo y mejorarlo.
 
 ---
-Creado con ❤️ por [Tu Nombre/GitHub]
+Desarrollado con ❤️ para optimizar el tiempo de estudio.
