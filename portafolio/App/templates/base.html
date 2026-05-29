@@ -260,7 +260,7 @@
             {% endfor %}
         ];
 
-        const Toast = Swal.mixin({
+        window.Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
@@ -280,7 +280,7 @@
             if (msg.level.includes('success')) icon = 'success';
             else if (msg.level.includes('error')) icon = 'error';
             else if (msg.level.includes('warning')) icon = 'warning';
-            Toast.fire({ icon: icon, title: msg.text });
+            window.Toast.fire({ icon: icon, title: msg.text });
         });
 
         // ── SweetAlert2 confirm para logout ───────────────────────
