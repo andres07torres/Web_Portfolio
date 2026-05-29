@@ -17,6 +17,14 @@ body {
     background-color: #0f0f0f;
 }
 
+section[id],
+[id^="sobre-mi"],
+[id^="proyectos"],
+[id^="experiencia"],
+[id^="contacto"] {
+    scroll-margin-top: 80px;
+}
+
 .custom-navbar {
     background: var(--glass-bg) !important;
     backdrop-filter: blur(12px);
