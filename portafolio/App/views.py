@@ -5,8 +5,9 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.cache import cache
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.conf import settings
+from django.template.loader import render_to_string
 from django.utils.html import escape
 import json
 import re
@@ -31,16 +32,35 @@ def get_client_ip(request):
 
 # ─── Portafolio público ───────────────────────────────────────
 def base(request):
+    return render(request, 'index.html')
+
+# ─── Lazy Section Load (AJAX) ────────────────────────────────
+def section_sobre_mi(request):
     acerca_de = AcercaDe.objects.first()
     habilidades = Habilidad.objects.all().order_by('orden')
-    experiencias = Experiencia.objects.all().order_by('-orden')
-    proyectos = Proyecto.objects.all().order_by('orden')
-    return render(request, 'index.html', {
+    html = render_to_string('secciones/sobre_mi.html', {
         'acerca_de': acerca_de,
         'habilidades': habilidades,
+    }, request=request)
+    return HttpResponse(html)
+
+def section_experiencia(request):
+    experiencias = Experiencia.objects.all().order_by('-orden')
+    html = render_to_string('secciones/experiencia.html', {
         'experiencias': experiencias,
+    }, request=request)
+    return HttpResponse(html)
+
+def section_proyectos(request):
+    proyectos = Proyecto.objects.all().order_by('orden')
+    html = render_to_string('secciones/proyectos.html', {
         'proyectos': proyectos,
-    })
+    }, request=request)
+    return HttpResponse(html)
+
+def section_contacto(request):
+    html = render_to_string('secciones/contacto.html', {}, request=request)
+    return HttpResponse(html)
 
 class CustomLoginView(LoginView):
     template_name = 'login.html'

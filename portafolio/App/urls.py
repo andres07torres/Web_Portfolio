@@ -7,6 +7,10 @@ urlpatterns = [
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.custom_logout, name='logout'),
     path('contacto/', views.contacto, name='contacto'),
+    path('section/sobre-mi/', views.section_sobre_mi, name='section_sobre_mi'),
+    path('section/experiencia/', views.section_experiencia, name='section_experiencia'),
+    path('section/proyectos/', views.section_proyectos, name='section_proyectos'),
+    path('section/contacto/', views.section_contacto, name='section_contacto'),
 
     # Dashboard personalizado
     path('dashboard/', views.dashboard_index, name='dashboard_index'),

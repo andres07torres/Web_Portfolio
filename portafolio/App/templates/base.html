@@ -180,8 +180,43 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
-        // Auto-close navbar on mobile when a link is clicked
+        // ── Lazy Section Loader ────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', function() {
+            function loadSection(section) {
+                if (section.dataset.loaded === 'true' || section.classList.contains('loading')) return;
+                const url = section.dataset.url;
+                if (!url) return;
+                section.classList.add('loading');
+                fetch(url)
+                    .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+                    .then(html => {
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+                        const content = temp.firstElementChild;
+                        if (content) {
+                            section.replaceWith(content);
+                            content.dataset.loaded = 'true';
+                            content.querySelectorAll('script').forEach(old => {
+                                const s = document.createElement('script');
+                                for (const a of old.attributes) s.setAttribute(a.name, a.value);
+                                s.textContent = old.textContent;
+                                old.replaceWith(s);
+                            });
+                        }
+                    })
+                    .catch(() => { section.innerHTML = '<div class="text-center py-5 text-white-50">Error al cargar secci\u00f3n</div>'; })
+                    .finally(() => section.classList.remove('loading'));
+            }
+
+            const lazySections = document.querySelectorAll('.lazy-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) { loadSection(entry.target); observer.unobserve(entry.target); }
+                });
+            }, { rootMargin: '300px' });
+            lazySections.forEach(s => observer.observe(s));
+
+            // ── Navbar collapse on mobile + pre-load section ──
             const navLinks = document.querySelectorAll('#navbarNav .nav-link:not(.dropdown-toggle)');
             const menuToggle = document.getElementById('navbarNav');
             const bsCollapse = new bootstrap.Collapse(menuToggle, { toggle: false });
@@ -189,14 +224,17 @@
             navLinks.forEach((l) => {
                 l.addEventListener('click', (e) => {
                     const href = l.getAttribute('href');
-                    if (!href || !href.startsWith('#') || window.innerWidth >= 992 || !menuToggle.classList.contains('show')) return;
-                    e.preventDefault();
-                    bsCollapse.hide();
-                    menuToggle.addEventListener('hidden.bs.collapse', function handler() {
-                        menuToggle.removeEventListener('hidden.bs.collapse', handler);
-                        const target = document.querySelector(href);
-                        if (target) target.scrollIntoView({ block: 'start' });
-                    });
+                    if (!href || !href.startsWith('#')) return;
+                    const target = document.querySelector(href);
+                    if (target && target.classList.contains('lazy-section')) loadSection(target);
+                    if (window.innerWidth < 992 && menuToggle.classList.contains('show')) {
+                        e.preventDefault();
+                        bsCollapse.hide();
+                        menuToggle.addEventListener('hidden.bs.collapse', function handler() {
+                            menuToggle.removeEventListener('hidden.bs.collapse', handler);
+                            if (target) target.scrollIntoView({ block: 'start' });
+                        });
+                    }
                 });
             });
         });
@@ -212,10 +250,7 @@
         });
 
         backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            window.scrollTo({ top: 0 });
         });
 
         // ── Django messages → SweetAlert2 Toasts ──────────────────
