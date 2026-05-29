@@ -100,7 +100,7 @@
     transition: all 0.25s ease;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     position: relative;
     overflow: hidden;
 }
@@ -111,6 +111,23 @@
     transform: translateX(4px);
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
+
+.skill-card-drag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    min-height: 44px;
+    cursor: grab;
+    color: rgba(255,255,255,0.15);
+    transition: color 0.2s;
+    flex-shrink: 0;
+    font-size: 1rem;
+    border-radius: 6px;
+}
+.skill-card-compact:hover .skill-card-drag,
+.skill-card-drag:hover { color: var(--accent-color); background: rgba(0,212,255,0.06); }
+.skill-card-drag:active { cursor: grabbing; }
 
 .skill-card-icon {
     width: 46px; height: 46px;
@@ -239,6 +256,7 @@
 <div id="habilidadesGrid" class="skill-grid">
     {% for h in habilidades %}
     <div class="skill-card-compact" id="hab-card-{{ h.pk }}">
+        <div class="skill-card-drag" title="Arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></div>
         <div class="skill-card-icon">
             <i class="{{ h.icono_class }}"></i>
         </div>
@@ -517,6 +535,7 @@ function insertOrUpdateCard(data) {
     // Construir el HTML de la card horizontal compacta
     const cardHTML = `
     <div class="skill-card-compact" id="hab-card-${data.pk}">
+        <div class="skill-card-drag" title="Arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></div>
         <div class="skill-card-icon">
             <i class="${data.icono_class}"></i>
         </div>
@@ -568,10 +587,10 @@ function initHabSortable() {
         animation: 200,
         easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
         filter: 'button, a, .btn-action-small',
+        handle: '.skill-card-drag',
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
-        touchStartThreshold: 20,
         onEnd: function () {
             const ordenes = Array.from(grid.children).map(el => el.id.replace('hab-card-', ''));
             fetch(REORDER_URL, {

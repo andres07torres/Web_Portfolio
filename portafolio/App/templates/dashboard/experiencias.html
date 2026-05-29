@@ -24,10 +24,27 @@
     padding: 1.25rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
-    gap: 1.25rem;
+    gap: 0.75rem;
     position: relative;
     overflow: hidden;
 }
+
+.exp-card-drag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    min-height: 44px;
+    cursor: grab;
+    color: rgba(255,255,255,0.15);
+    transition: color 0.2s;
+    flex-shrink: 0;
+    font-size: 1rem;
+    border-radius: 6px;
+}
+.exp-card-horizontal:hover .exp-card-drag,
+.exp-card-drag:hover { color: var(--accent-color); background: rgba(0,212,255,0.06); }
+.exp-card-drag:active { cursor: grabbing; }
 
 .exp-card-horizontal:hover {
     background: rgba(0,212,255,0.04);
@@ -173,6 +190,7 @@
 <div id="experienciasGrid" class="exp-grid">
     {% for exp in experiencias %}
     <div class="exp-card-horizontal" id="exp-card-{{ exp.pk }}">
+        <div class="exp-card-drag" title="Arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></div>
         <div class="exp-card-left">
             <i class="bi bi-briefcase"></i>
         </div>
@@ -303,10 +321,10 @@ function initExpSortable() {
         animation: 200,
         easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
         filter: 'button, a, .btn-action-exp',
+        handle: '.exp-card-drag',
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
-        touchStartThreshold: 20,
         onEnd: function () {
             const ordenes = Array.from(grid.children).map(el => el.id.replace('exp-card-', ''));
             fetch(REORDER_URL, {
@@ -325,6 +343,7 @@ initExpSortable();
 function insertOrUpdateExpCard(data) {
     const cardHTML = `
     <div class="exp-card-horizontal" id="exp-card-${data.pk}">
+        <div class="exp-card-drag" title="Arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></div>
         <div class="exp-card-left">
             <i class="bi bi-briefcase"></i>
         </div>
