@@ -571,6 +571,8 @@ function initHabSortable() {
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
+        delay: 3000,
+        delayOnTouchOnly: true,
         touchStartThreshold: 8,
         onEnd: function () {
             const ordenes = Array.from(grid.children).map(el => el.id.replace('hab-card-', ''));
