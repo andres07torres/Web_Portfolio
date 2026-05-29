@@ -186,11 +186,44 @@ section[id],
 
 .navbar-toggler {
     border: none;
-    padding: 0;
+    padding: 6px 4px;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-.navbar-toggler-icon {
-    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0, 212, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E") !important;
+.hamburger-lines {
+    width: 22px;
+    height: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease;
+}
+
+.hamburger-lines span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--accent-color);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.navbar-toggler[aria-expanded="true"] .hamburger-lines {
+    transform: rotate(180deg);
+}
+
+.navbar-toggler[aria-expanded="true"] .hamburger-lines span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.navbar-toggler[aria-expanded="true"] .hamburger-lines span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.navbar-toggler[aria-expanded="true"] .hamburger-lines span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
 }
 /* Efecto de elevación para proyectos */
 .transition-up {
