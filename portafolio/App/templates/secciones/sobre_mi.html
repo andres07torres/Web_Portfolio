@@ -53,36 +53,98 @@
                     {% endif %}
                 </div>
                 <div class="p-4 rounded-4 glass-card transition-up">
-                    <h5 class="text-white mb-4 fw-bold text-center">Stack Tecnológico</h5>
-                    <div class="d-flex flex-wrap gap-2 justify-content-center">
-                        {% if habilidades %}
-                            {% for habilidad in habilidades %}
-                                <span class="badge skill-badge bg-transparent text-accent">
-                                    <i class="{{ habilidad.icono_class }} me-1"></i> {{ habilidad.nombre }}
-                                </span>
-                            {% endfor %}
-                        {% else %}
-                            <span class="badge skill-badge bg-transparent text-accent"><i
-                                    class="bi bi-filetype-py me-1"></i> Python</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i class="bi bi-server me-1"></i>
-                                Django</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i
-                                    class="bi bi-filetype-html me-1"></i> HTML5</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i
-                                    class="bi bi-filetype-css me-1"></i> CSS3</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i
-                                    class="bi bi-filetype-js me-1"></i> JavaScript</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i class="bi bi-database me-1"></i>
-                                PostgreSQL</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i
-                                    class="bi bi-hdd-network me-1"></i> REST APIs</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i class="bi bi-box-seam me-1"></i>
-                                Docker</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i class="bi bi-bootstrap me-1"></i>
-                                Bootstrap</span>
-                            <span class="badge skill-badge bg-transparent text-accent"><i class="bi bi-git me-1"></i>
-                                Git</span>
-                        {% endif %}
+                    <h5 class="text-white mb-3 fw-bold text-center">Stack Tecnológico</h5>
+                    <style>
+                        .marquee-wrap {
+                            overflow: hidden;
+                            mask-image: linear-gradient(to right, transparent 2%, black 8%, black 92%, transparent 98%);
+                            -webkit-mask-image: linear-gradient(to right, transparent 2%, black 8%, black 92%, transparent 98%);
+                        }
+                        .marquee-track {
+                            display: flex;
+                            gap: 0.75rem;
+                            width: max-content;
+                            animation: marqueeScroll 40s linear infinite;
+                        }
+                        .marquee-wrap:hover .marquee-track {
+                            animation-play-state: paused;
+                        }
+                        @keyframes marqueeScroll {
+                            0% { transform: translateX(0); }
+                            100% { transform: translateX(-50%); }
+                        }
+                        .marquee-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            padding: 0.5rem 1rem;
+                            background: rgba(0, 212, 255, 0.06);
+                            border: 1px solid rgba(0, 212, 255, 0.15);
+                            border-radius: 100px;
+                            white-space: nowrap;
+                            color: var(--accent-color, #00d4ff);
+                            font-size: 0.85rem;
+                            font-weight: 500;
+                            transition: all 0.25s ease;
+                            flex-shrink: 0;
+                        }
+                        .marquee-item i,
+                        .marquee-item [class*="devicon-"] {
+                            font-size: 1.15rem;
+                        }
+                        .marquee-item:hover {
+                            background: rgba(0, 212, 255, 0.14);
+                            border-color: rgba(0, 212, 255, 0.35);
+                            box-shadow: 0 0 16px rgba(0, 212, 255, 0.15);
+                            transform: scale(1.05);
+                        }
+                        /* Forzar color visible en devicons sin 'colored' */
+                        .marquee-item [class*="devicon-"]:not([class*="colored"]) {
+                            filter: brightness(0) invert(0.85);
+                        }
+                        .marquee-item [class*="devicon-"] {
+                            color: rgba(255,255,255,0.85);
+                        }
+                    </style>
+                    <div class="marquee-wrap">
+                        <div class="marquee-track">
+                            {% if habilidades %}
+                                {% for habilidad in habilidades %}
+                                <div class="marquee-item">
+                                    <i class="{{ habilidad.icono_class }}"></i>
+                                    <span>{{ habilidad.nombre }}</span>
+                                </div>
+                                {% endfor %}
+                                {% for habilidad in habilidades %}
+                                <div class="marquee-item">
+                                    <i class="{{ habilidad.icono_class }}"></i>
+                                    <span>{{ habilidad.nombre }}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="marquee-item"><i class="bi bi-filetype-py"></i><span>Python</span></div>
+                                <div class="marquee-item"><i class="bi bi-server"></i><span>Django</span></div>
+                                <div class="marquee-item"><i class="bi bi-filetype-html"></i><span>HTML5</span></div>
+                                <div class="marquee-item"><i class="bi bi-filetype-css"></i><span>CSS3</span></div>
+                                <div class="marquee-item"><i class="bi bi-filetype-js"></i><span>JavaScript</span></div>
+                                <div class="marquee-item"><i class="bi bi-database"></i><span>PostgreSQL</span></div>
+                                <div class="marquee-item"><i class="bi bi-hdd-network"></i><span>REST APIs</span></div>
+                                <div class="marquee-item"><i class="bi bi-box-seam"></i><span>Docker</span></div>
+                                <div class="marquee-item"><i class="bi bi-bootstrap"></i><span>Bootstrap</span></div>
+                                <div class="marquee-item"><i class="bi bi-git"></i><span>Git</span></div>
+                                <!-- duplicado para loop infinito -->
+                                <div class="marquee-item"><i class="bi bi-filetype-py"></i><span>Python</span></div>
+                                <div class="marquee-item"><i class="bi bi-server"></i><span>Django</span></div>
+                                <div class="marquee-item"><i class="bi bi-filetype-html"></i><span>HTML5</span></div>
+                                <div class="marquee-item"><i class="bi bi-filetype-css"></i><span>CSS3</span></div>
+                                <div class="marquee-item"><i class="bi bi-filetype-js"></i><span>JavaScript</span></div>
+                                <div class="marquee-item"><i class="bi bi-database"></i><span>PostgreSQL</span></div>
+                                <div class="marquee-item"><i class="bi bi-hdd-network"></i><span>REST APIs</span></div>
+                                <div class="marquee-item"><i class="bi bi-box-seam"></i><span>Docker</span></div>
+                                <div class="marquee-item"><i class="bi bi-bootstrap"></i><span>Bootstrap</span></div>
+                                <div class="marquee-item"><i class="bi bi-git"></i><span>Git</span></div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
