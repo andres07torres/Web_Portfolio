@@ -294,6 +294,34 @@ async function submitExp(e) {
     }
 }
 
+// ── SortableJS ──────────────────────────────────────────────
+const REORDER_URL = '{% url "dashboard_reordenar" %}';
+function initExpSortable() {
+    const grid = document.getElementById('experienciasGrid');
+    if (!grid || !grid.classList.contains('exp-grid')) return;
+    new Sortable(grid, {
+        animation: 200,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        filter: 'button, a, .btn-action-exp',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        touchStartThreshold: 8,
+        onEnd: function () {
+            const ordenes = Array.from(grid.children).map(el => el.id.replace('exp-card-', ''));
+            fetch(REORDER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': EXP_CSRF },
+                body: JSON.stringify({ modelo: 'experiencia', ordenes: ordenes })
+            }).then(r => r.json()).then(d => {
+                if (d.success) Toast.fire({ icon: 'success', title: 'Orden actualizado', timer: 1500 });
+            }).catch(() => {});
+        }
+    });
+}
+
+initExpSortable();
+
 function insertOrUpdateExpCard(data) {
     const cardHTML = `
     <div class="exp-card-horizontal" id="exp-card-${data.pk}">
@@ -331,6 +359,7 @@ function insertOrUpdateExpCard(data) {
 
     if (empty) {
         grid.outerHTML = `<div id="experienciasGrid" class="exp-grid">${cardHTML}</div>`;
+        initExpSortable();
         return;
     }
     if (existing) { existing.outerHTML = cardHTML; }

@@ -8,6 +8,7 @@ from django.core.cache import cache
 from django.http import JsonResponse
 from django.conf import settings
 from django.utils.html import escape
+import json
 import re
 from .models import AcercaDe, Habilidad, Experiencia, Proyecto, Personalizacion, RedSocial
 from .forms import (
@@ -377,6 +378,40 @@ def dashboard_proyecto_ajax(request, pk=None):
         })
     else:
         return JsonResponse({'success': False, 'error': 'El título es obligatorio.'})
+
+# ─── Reordenar (SortableJS) ───────────────────────────────────
+@admin_required
+def dashboard_reordenar(request):
+    """Recibe JSON con {modelo, ordenes} y actualiza el campo `orden`."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido.'}, status=400)
+
+    modelo  = data.get('modelo')
+    ordenes = data.get('ordenes', [])
+
+    models_map = {
+        'habilidad':   Habilidad,
+        'experiencia': Experiencia,
+        'proyecto':    Proyecto,
+    }
+
+    ModelClass = models_map.get(modelo)
+    if not ModelClass:
+        return JsonResponse({'success': False, 'error': 'Modelo no válido.'}, status=400)
+
+    for idx, pk in enumerate(ordenes):
+        if modelo == 'experiencia':
+            # Experiencia ordena descendente: primero visual = orden más alto
+            ModelClass.objects.filter(pk=pk).update(orden=len(ordenes) - 1 - idx)
+        else:
+            ModelClass.objects.filter(pk=pk).update(orden=idx)
+
+    return JsonResponse({'success': True})
 
 # ─── Reset por defecto ────────────────────────────────────────
 @admin_required

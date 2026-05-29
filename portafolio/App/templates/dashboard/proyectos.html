@@ -549,13 +549,41 @@ function insertOrUpdatePryCard(data) {
 
     if (empty) {
         grid.outerHTML = `<div id="proyectosGrid" class="pry-grid">${cardHTML}</div>`;
+        initPrySortable();
         return;
     }
     if (existing) { existing.outerHTML = cardHTML; }
     else { grid.insertAdjacentHTML('afterbegin', cardHTML); }
 }
 
-// Inicializar picker
+// ── SortableJS ──────────────────────────────────────────────
+const REORDER_URL = '{% url "dashboard_reordenar" %}';
+function initPrySortable() {
+    const grid = document.getElementById('proyectosGrid');
+    if (!grid || !grid.classList.contains('pry-grid')) return;
+    new Sortable(grid, {
+        animation: 200,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        filter: 'button, a, .btn-action-pry',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        touchStartThreshold: 8,
+        onEnd: function () {
+            const ordenes = Array.from(grid.children).map(el => el.id.replace('pry-card-', ''));
+            fetch(REORDER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': PRY_CSRF },
+                body: JSON.stringify({ modelo: 'proyecto', ordenes: ordenes })
+            }).then(r => r.json()).then(d => {
+                if (d.success) Toast.fire({ icon: 'success', title: 'Orden actualizado', timer: 1500 });
+            }).catch(() => {});
+        }
+    });
+}
+
+// Inicializar picker y sortable
 renderPryIcons(PRY_ICONS);
+initPrySortable();
 </script>
 {% endblock %}

@@ -548,6 +548,7 @@ function insertOrUpdateCard(data) {
 
     if (empty) {
         grid.outerHTML = `<div id="habilidadesGrid" class="skill-grid">${cardHTML}</div>`;
+        initHabSortable();
         return;
     }
 
@@ -558,7 +559,34 @@ function insertOrUpdateCard(data) {
     }
 }
 
-// Inicializar picker al cargar
+// ── SortableJS ──────────────────────────────────────────────
+const REORDER_URL = '{% url "dashboard_reordenar" %}';
+function initHabSortable() {
+    const grid = document.getElementById('habilidadesGrid');
+    if (!grid || !grid.classList.contains('skill-grid')) return;
+    new Sortable(grid, {
+        animation: 200,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        filter: 'button, a, .btn-action-small',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        touchStartThreshold: 8,
+        onEnd: function () {
+            const ordenes = Array.from(grid.children).map(el => el.id.replace('hab-card-', ''));
+            fetch(REORDER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ modelo: 'habilidad', ordenes: ordenes })
+            }).then(r => r.json()).then(d => {
+                if (d.success) Toast.fire({ icon: 'success', title: 'Orden actualizado', timer: 1500 });
+            }).catch(() => {});
+        }
+    });
+}
+
+// Inicializar picker y sortable al cargar
 renderHabIcons(HAB_ICONS);
+initHabSortable();
 </script>
 {% endblock %}

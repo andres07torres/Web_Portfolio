@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css">
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1.4">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
     <style>
         :root {
             --sidebar-width: 260px;
@@ -425,6 +426,24 @@
             .btn-view-site { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
             .btn-view-site span { display: none; }
         }
+
+        /* ── SortableJS drag styles ─────────────────────────── */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(0, 212, 255, 0.08) !important;
+            border: 1px dashed rgba(0, 212, 255, 0.5) !important;
+        }
+        .sortable-chosen {
+            background: rgba(0, 212, 255, 0.06) !important;
+            border-color: rgba(0, 212, 255, 0.4) !important;
+        }
+        .skill-card-compact, .exp-card-horizontal, .pry-card-horizontal {
+            cursor: grab;
+        }
+        .skill-card-compact:active, .exp-card-horizontal:active, .pry-card-horizontal:active {
+            cursor: grabbing;
+        }
+
     </style>
     {% block extra_css %}{% endblock %}
 </head>

@@ -35,6 +35,9 @@ urlpatterns = [
     path('dashboard/proyectos/<int:pk>/editar/', views.dashboard_proyecto_form, name='dashboard_proyecto_editar'),
     path('dashboard/proyectos/<int:pk>/eliminar/', views.dashboard_proyecto_eliminar, name='dashboard_proyecto_eliminar'),
 
+    # Reordenar (SortableJS)
+    path('dashboard/reordenar/', views.dashboard_reordenar, name='dashboard_reordenar'),
+
     # Reset por defecto
     path('dashboard/acerca-de/reset/', views.dashboard_reset_acercade, name='dashboard_reset_acercade'),
     path('dashboard/habilidades/reset/', views.dashboard_reset_habilidades, name='dashboard_reset_habilidades'),
