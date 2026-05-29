@@ -568,9 +568,7 @@ function initPrySortable() {
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
-        delay: 3000,
-        delayOnTouchOnly: true,
-        touchStartThreshold: 8,
+        touchStartThreshold: 20,
         onEnd: function () {
             const ordenes = Array.from(grid.children).map(el => el.id.replace('pry-card-', ''));
             fetch(REORDER_URL, {
