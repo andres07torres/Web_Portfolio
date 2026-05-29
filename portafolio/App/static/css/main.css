@@ -49,6 +49,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     position: relative;
+    white-space: nowrap;
     transition: all 0.3s ease;
 }
 
