@@ -187,10 +187,16 @@
             const bsCollapse = new bootstrap.Collapse(menuToggle, { toggle: false });
 
             navLinks.forEach((l) => {
-                l.addEventListener('click', () => {
-                    if (window.innerWidth < 992 && menuToggle.classList.contains('show')) {
-                        bsCollapse.hide();
-                    }
+                l.addEventListener('click', (e) => {
+                    const href = l.getAttribute('href');
+                    if (!href || !href.startsWith('#') || window.innerWidth >= 992 || !menuToggle.classList.contains('show')) return;
+                    e.preventDefault();
+                    bsCollapse.hide();
+                    menuToggle.addEventListener('hidden.bs.collapse', function handler() {
+                        menuToggle.removeEventListener('hidden.bs.collapse', handler);
+                        const target = document.querySelector(href);
+                        if (target) target.scrollIntoView({ block: 'start' });
+                    });
                 });
             });
         });
