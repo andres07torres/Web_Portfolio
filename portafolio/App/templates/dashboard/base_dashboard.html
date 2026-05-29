@@ -59,11 +59,33 @@
             transition: transform 0.3s ease;
         }
 
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
         .sidebar-brand {
             padding: 1.5rem 1.5rem 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
             text-decoration: none;
         }
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 1rem;
+            padding: 0 1.5rem 1rem 0;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.3s ease, opacity 0.3s ease;
+            align-self: flex-end;
+            opacity: 0;
+            transform: rotate(-90deg) scale(0.6);
+        }
+        .sidebar.open .sidebar-close {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+        .sidebar-close:hover { color: #fff; }
         .sidebar-brand-text {
             font-size: 1.3rem;
             font-weight: 700;
@@ -455,10 +477,15 @@
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
-    <a href="{% url 'dashboard_index' %}" class="sidebar-brand text-decoration-none">
-        <div class="sidebar-brand-text">Andr3s <span>Dev</span></div>
-        <span class="sidebar-subtitle">Panel de Control</span>
-    </a>
+    <div class="sidebar-header">
+        <a href="{% url 'dashboard_index' %}" class="sidebar-brand text-decoration-none">
+            <div class="sidebar-brand-text">Andr3s <span>Dev</span></div>
+            <span class="sidebar-subtitle">Panel de Control</span>
+        </a>
+        <button class="sidebar-close d-lg-none" onclick="closeSidebar()" aria-label="Cerrar sidebar">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
 
     <nav class="sidebar-nav">
         <span class="sidebar-section-title">General</span>
