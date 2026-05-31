@@ -2,9 +2,9 @@ from django.db import models
 from ckeditor.fields import RichTextField
 
 class AcercaDe(models.Model):
-    titulo = models.CharField(max_length=100, default="Sobre mí")
-    subtitulo = models.CharField(max_length=200, help_text="Ej: Soy un Desarrollador Frontend y Backend...")
-    descripcion = models.TextField()
+    titulo = models.CharField(max_length=100, default="Sobre mí", blank=True)
+    subtitulo = models.CharField(max_length=200, blank=True, help_text="Ej: Soy un Desarrollador Frontend y Backend...")
+    descripcion = models.TextField(blank=True)
     foto = models.ImageField(upload_to='perfil/', null=True, blank=True)
     
     class Meta:

@@ -205,7 +205,14 @@ def dashboard_acercade(request):
             messages.success(request, '✓ Información de "Sobre mí" actualizada.')
             return redirect('dashboard_acercade')
         else:
-            messages.error(request, 'Error al guardar. Revisa los campos.')
+            errores = []
+            for field, errs in form.errors.items():
+                label = form.fields[field].label or field
+                errores.append(f'{label}: {errs[0]}')
+            msg = 'Error al guardar. ' + ' | '.join(errores)
+            if request.FILES.get('foto'):
+                msg += ' (vuelve a seleccionar la foto)'
+            messages.error(request, msg)
     else:
         form = AcercaDeForm(instance=obj)
 
