@@ -42,8 +42,8 @@
             </div>
             <div class="col-lg-5 offset-lg-1 mt-4 mt-lg-5">
                 <div class="text-center mb-4">
-                    {% if acerca_de and acerca_de.foto %}
-                        <img src="{{ acerca_de.foto.url }}" alt="Carlos Andres Torres"
+                    {% if acerca_de and acerca_de.foto_url_valida %}
+                        <img src="{{ acerca_de.foto_url_valida }}" alt="Carlos Andres Torres"
                             class="img-fluid rounded-4 shadow-lg"
                             style="width: 70%; border: 1px solid rgba(255,255,255,0.1);">
                     {% else %}

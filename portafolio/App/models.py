@@ -7,6 +7,16 @@ class AcercaDe(models.Model):
     descripcion = models.TextField(blank=True)
     foto = models.ImageField(upload_to='perfil/', null=True, blank=True)
     
+    @property
+    def foto_url_valida(self):
+        if self.foto:
+            try:
+                if self.foto.storage.exists(self.foto.name):
+                    return self.foto.url
+            except Exception:
+                pass
+        return None
+    
     class Meta:
         verbose_name = "Acerca de mí"
         verbose_name_plural = "Acerca de mí"

@@ -40,9 +40,9 @@
             <div class="col-lg-4">
                 <div class="mb-3">
                     <label class="form-label">Foto de Perfil</label>
-                    {% if object and object.foto %}
+                    {% if object and object.foto_url_valida %}
                         <div class="mb-3 text-center p-3 rounded-3" style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);">
-                            <img src="{{ object.foto.url }}" alt="Foto actual" style="width:100%;max-width:150px;border-radius:12px;border:1px solid rgba(0,212,255,0.3);margin-bottom:.75rem;">
+                            <img src="{{ object.foto_url_valida }}" alt="Foto actual" style="width:100%;max-width:150px;border-radius:12px;border:1px solid rgba(0,212,255,0.3);margin-bottom:.75rem;">
                             <div class="footer-text mb-2" style="font-size:.75rem;">Foto actual</div>
                             <button type="button" class="btn-danger-ghost" style="font-size:.78rem;padding:.35rem .85rem;cursor:pointer;"
                                 onclick="confirmarEliminarFoto()">
