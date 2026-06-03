@@ -166,12 +166,12 @@ STORAGES = {
         'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage' if os.environ.get('CLOUDINARY_URL') else 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
 
 # Compatibilidad con django-cloudinary-storage en Django 5.x/6.x
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage' if os.environ.get('CLOUDINARY_URL') else 'django.core.files.storage.FileSystemStorage'
 
 LOGIN_REDIRECT_URL = '/dashboard/'
