@@ -4,12 +4,11 @@ from .models import AcercaDe, Habilidad, Experiencia, Proyecto, Personalizacion,
 class AcercaDeForm(forms.ModelForm):
     class Meta:
         model = AcercaDe
-        fields = ['titulo', 'subtitulo', 'descripcion', 'foto']
+        fields = ['titulo', 'subtitulo', 'descripcion']
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'subtitulo': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'foto': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
 class HabilidadForm(forms.ModelForm):

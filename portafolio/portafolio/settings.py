@@ -45,8 +45,6 @@ CSRF_TRUSTED_ORIGINS = [f'https://{h}' for h in ALLOWED_HOSTS if h]
 
 
 
-CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,15 +52,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-]
-
-if CLOUDINARY_URL:
-    INSTALLED_APPS.append('cloudinary')
-
-INSTALLED_APPS.extend([
     'App',
     'ckeditor',
-])
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -159,16 +151,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Django 6.x: usar STORAGES en lugar del deprecado STATICFILES_STORAGE
 STORAGES = {
     'default': {
-        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage' if os.environ.get('CLOUDINARY_URL') else 'django.core.files.storage.FileSystemStorage',
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
-
-# Compatibilidad con django-cloudinary-storage en Django 5.x/6.x
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage' if os.environ.get('CLOUDINARY_URL') else 'django.core.files.storage.FileSystemStorage'
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
