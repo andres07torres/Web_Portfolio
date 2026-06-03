@@ -53,12 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
 ]
-
-if CLOUDINARY_URL:
-    INSTALLED_APPS.append('cloudinary_storage')
-
-INSTALLED_APPS.append('django.contrib.staticfiles')
 
 if CLOUDINARY_URL:
     INSTALLED_APPS.append('cloudinary')
