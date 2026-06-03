@@ -49,6 +49,11 @@
                                 <i class="bi bi-trash me-1"></i> Eliminar foto
                             </button>
                         </div>
+                    {% else %}
+                        <div class="mb-3 text-center p-3 rounded-3" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);">
+                            <img src="{% static 'img/foto.jpg' %}" alt="Foto por defecto" style="width:100%;max-width:150px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);margin-bottom:.75rem;opacity:0.75;">
+                            <div class="footer-text mb-2" style="font-size:.75rem;color:rgba(255,255,255,0.5);">Foto por defecto (estática)</div>
+                        </div>
                     {% endif %}
                     <input type="hidden" name="eliminar_foto" id="eliminarFotoInput" value="0">
                     <input type="file" name="foto" class="form-control" accept="image/*" id="fotoInput">
