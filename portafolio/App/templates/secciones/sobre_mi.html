@@ -42,9 +42,15 @@
             </div>
             <div class="col-lg-5 offset-lg-1 mt-4 mt-lg-5">
                 <div class="text-center mb-4">
-                    <img src="{% static 'img/foto.jpg' %}" alt="Carlos Andres Torres"
-                        class="img-fluid rounded-4 shadow-lg"
-                        style="width: 70%; border: 1px solid rgba(255,255,255,0.1);">
+                    {% if acerca_de and acerca_de.foto %}
+                        <img src="{{ acerca_de.foto.url }}" alt="Carlos Andres Torres"
+                            class="img-fluid rounded-4 shadow-lg"
+                            style="width: 70%; border: 1px solid rgba(255,255,255,0.1);">
+                    {% else %}
+                        <img src="{% static 'img/foto.jpg' %}" alt="Carlos Andres Torres"
+                            class="img-fluid rounded-4 shadow-lg"
+                            style="width: 70%; border: 1px solid rgba(255,255,255,0.1);">
+                    {% endif %}
                 </div>
                 <div class="p-4 rounded-4 glass-card transition-up">
                     <h5 class="text-white mb-3 fw-bold text-center">Stack Tecnológico</h5>

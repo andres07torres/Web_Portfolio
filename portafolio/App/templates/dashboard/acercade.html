@@ -22,7 +22,7 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="row g-4">
-            <div class="col-lg-12">
+            <div class="col-lg-8">
                 <div class="mb-3">
                     <label class="form-label">Título Principal <span class="text-accent">*</span></label>
                     <input type="text" name="titulo" class="form-control" placeholder="Ej: Sobre mí" value="{{ form.titulo.value|default:'' }}" required>
@@ -37,6 +37,30 @@
                     <textarea name="descripcion" class="form-control" placeholder="Escribe tu presentación personal aquí...">{{ form.descripcion.value|default:'' }}</textarea>
                 </div>
             </div>
+            <div class="col-lg-4">
+                <div class="mb-3">
+                    <label class="form-label">Foto de Perfil</label>
+                    {% if object and object.foto %}
+                        <div class="mb-3 text-center p-3 rounded-3" style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);">
+                            <img src="{{ object.foto.url }}" alt="Foto actual" style="width:100%;max-width:150px;border-radius:12px;border:1px solid rgba(0,212,255,0.3);margin-bottom:.75rem;">
+                            <div class="footer-text mb-2" style="font-size:.75rem;">Foto actual</div>
+                            <button type="button" class="btn-danger-ghost" style="font-size:.78rem;padding:.35rem .85rem;cursor:pointer;"
+                                onclick="confirmarEliminarFoto()">
+                                <i class="bi bi-trash me-1"></i> Eliminar foto
+                            </button>
+                        </div>
+                    {% endif %}
+                    <input type="hidden" name="eliminar_foto" id="eliminarFotoInput" value="0">
+                    <input type="file" name="foto" class="form-control" accept="image/*" id="fotoInput">
+                    <div class="footer-text mt-1" style="font-size:.75rem;">PNG, JPG o WEBP. Máx 5MB.</div>
+                </div>
+
+                <!-- Preview -->
+                <div id="previewContainer" style="display:none;" class="text-center mt-2">
+                    <img id="fotoPreview" style="width:100%;max-width:160px;border-radius:12px;border:1px solid rgba(0,212,255,0.3);" alt="Vista previa">
+                    <div class="footer-text mt-1" style="font-size:.75rem;">Vista previa</div>
+                </div>
+            </div>
         </div>
 
         <div class="d-flex modal-footer-custom align-items-center justify-content-center gap-2 mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,0.06);">
@@ -45,6 +69,47 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Preview foto nueva
+document.getElementById('fotoInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('fotoPreview').src = ev.target.result;
+            document.getElementById('previewContainer').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Confirmar eliminación de foto actual
+function confirmarEliminarFoto() {
+    Swal.fire({
+        title: '¿Eliminar foto de perfil?',
+        text: 'La foto actual será eliminada del servidor.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        background: 'rgba(12,12,12,0.98)',
+        color: '#f8f9fa',
+        confirmButtonColor: '#ff4444',
+        cancelButtonColor: 'rgba(255,255,255,0.08)',
+        iconColor: '#ff4444',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) {
+            document.getElementById('eliminarFotoInput').value = '1';
+            // Enviar el formulario automáticamente
+            document.querySelector('form').submit();
+        }
+    });
+}
+</script>
 {% endblock %}
 
 
