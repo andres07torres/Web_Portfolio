@@ -17,23 +17,26 @@
                     </div>
 
                     <div class="mb-2 mb-md-3">
-                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_nombre">Tu Nombre</label>
+                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_nombre">Tu Nombre </label>
                         <input type="text" id="c_nombre" name="nombre" required maxlength="100"
                             class="form-control bg-transparent text-white border-secondary border-opacity-25 py-2"
-                            placeholder="Andr3s Dev">
+                            placeholder="Andr3sDev7">
+                        <small id="req_nombre" class="text-accent opacity-50 d-none d-block mt-1" style="font-size:.72rem;">Este campo es obligatorio</small>
                     </div>
                     <div class="mb-2 mb-md-3">
-                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_correo">Correo</label>
+                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_correo">Correo </label>
                         <input type="email" id="c_correo" name="correo" required maxlength="254"
                             class="form-control bg-transparent text-white border-secondary border-opacity-25 py-2"
                             placeholder="hola@ejemplo.com">
+                        <small id="req_correo" class="text-accent opacity-50 d-none d-block mt-1" style="font-size:.72rem;">Este campo es obligatorio</small>
                     </div>
                     <div class="mb-3 mb-md-4">
-                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_mensaje">Mensaje</label>
+                        <label class="footer-title mb-1 mb-md-2 d-block" for="c_mensaje">Mensaje </label>
                         <textarea id="c_mensaje" name="mensaje" required minlength="10" maxlength="2000"
                             class="form-control bg-transparent text-white border-secondary border-opacity-25"
                             rows="3" placeholder="Cuéntame sobre tu proyecto..."></textarea>
                         <small id="charCount" class="text-end d-block mt-1" style="color:rgba(255,255,255,0.25);font-size:.72rem;">0 / 2000</small>
+                        <small id="req_mensaje" class="text-accent opacity-50 d-none d-block mt-1" style="font-size:.72rem;">Este campo es obligatorio</small>
                     </div>
 
                     <div class="text-center">
@@ -58,6 +61,28 @@
     const spinner = document.getElementById('contactBtnSpinner');
     const charEl  = document.getElementById('charCount');
     const msgTa   = document.getElementById('c_mensaje');
+
+    const reqFields = [
+        { el: document.getElementById('c_nombre'),  req: document.getElementById('req_nombre') },
+        { el: document.getElementById('c_correo'),  req: document.getElementById('req_correo') },
+        { el: msgTa,                               req: document.getElementById('req_mensaje') },
+    ];
+    reqFields.forEach(({ el, req }) => {
+        let timer;
+        el.addEventListener('blur', () => {
+            if (el.value.trim().length === 0) {
+                req.classList.remove('d-none');
+                clearTimeout(timer);
+                timer = setTimeout(() => req.classList.add('d-none'), 3000);
+            }
+        });
+        el.addEventListener('input', () => {
+            if (el.value.trim().length > 0) {
+                clearTimeout(timer);
+                req.classList.add('d-none');
+            }
+        });
+    });
 
     // Contador de caracteres del mensaje
     msgTa.addEventListener('input', () => {
