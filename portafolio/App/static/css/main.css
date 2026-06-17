@@ -157,12 +157,26 @@ section[id],
 }
 
 @media (max-width: 991px) {
+    .navbar-collapse {
+        transition: none;
+    }
+    .navbar-collapse.collapsing {
+        display: block;
+        height: auto;
+        transition: none;
+    }
     .navbar-nav {
         padding: 1.5rem 0;
         text-align: center;
     }
     .nav-item {
         padding: 8px 0;
+    }
+    .nav-link:hover {
+        text-shadow: none;
+    }
+    .nav-link:hover::after {
+        width: 0;
     }
     .nav-login {
         margin-left: 0 !important;
@@ -217,6 +231,7 @@ section[id],
     flex-direction: column;
     justify-content: space-between;
     transition: transform 0.3s ease;
+    will-change: transform;
 }
 
 .hamburger-lines span {
