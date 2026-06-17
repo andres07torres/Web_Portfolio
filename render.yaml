@@ -13,7 +13,7 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: "localhost,127.0.0.1"
+        value: "127.0.0.1,localhost,andr3sdev7.com,www.andr3sdev7.com,web-portfolio-rk8x.onrender.com"
       - key: SECRET_KEY
         generateValue: true       # Render genera una clave segura automáticamente
       - key: DB_NAME
