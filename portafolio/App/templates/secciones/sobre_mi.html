@@ -44,11 +44,11 @@
                 <div class="text-center mb-4">
                     {% if acerca_de and acerca_de.foto_url_valida %}
                         <img src="{{ acerca_de.foto_url_valida }}" alt="Carlos Andres Torres"
-                            class="img-fluid rounded-4 shadow-lg"
+                            class="img-fluid rounded-4 shadow-lg" loading="lazy" width="400" height="400"
                             style="width: 70%; border: 1px solid rgba(255,255,255,0.1);">
                     {% else %}
                         <img src="{% static 'img/foto.jpg' %}" alt="Carlos Andres Torres"
-                            class="img-fluid rounded-4 shadow-lg"
+                            class="img-fluid rounded-4 shadow-lg" loading="lazy" width="400" height="400"
                             style="width: 70%; border: 1px solid rgba(255,255,255,0.1);">
                     {% endif %}
                 </div>
@@ -65,6 +65,7 @@
                             gap: 0.75rem;
                             width: max-content;
                             animation: marqueeScroll 40s linear infinite;
+                            will-change: transform;
                         }
                         .marquee-wrap:hover .marquee-track {
                             animation-play-state: paused;
@@ -85,8 +86,8 @@
                             color: var(--accent-color, #00d4ff);
                             font-size: 0.85rem;
                             font-weight: 500;
-                            transition: all 0.25s ease;
                             flex-shrink: 0;
+                            transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
                         }
                         .marquee-item i,
                         .marquee-item [class*="devicon-"] {
@@ -97,6 +98,9 @@
                             border-color: rgba(0, 212, 255, 0.35);
                             box-shadow: 0 0 16px rgba(0, 212, 255, 0.15);
                             transform: scale(1.05);
+                        }
+                        @media (prefers-reduced-motion: reduce) {
+                            .marquee-track { animation: none; }
                         }
                         /* Forzar color visible en devicons sin 'colored' */
                         .marquee-item [class*="devicon-"]:not([class*="colored"]) {

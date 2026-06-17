@@ -96,10 +96,6 @@
                             </li>
                         </ul>
                     </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link nav-login" href="{% url 'login' %}">Login</a>
-                    </li>
                     {% endif %}
                 </ul>
             </div>
@@ -172,12 +168,8 @@
         </div>
     </footer>
 
-    <a href="javascript:void(0)" id="backToTop" class="btn-back-to-top" title="Volver arriba">
-        <i class="bi bi-arrow-up"></i>
-    </a>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
     
     <script>
         // ── Lazy Section Loader ────────────────────────────────────────
@@ -239,13 +231,16 @@
             });
         });
 
-        // Back to Top Logic
+        // Back to Top Logic (throttled with rAF)
         const backToTopBtn = document.getElementById('backToTop');
+        let ticking = false;
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.add('visible');
-            } else {
-                backToTopBtn.classList.remove('visible');
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    backToTopBtn.classList.toggle('visible', window.scrollY > 300);
+                    ticking = false;
+                });
+                ticking = true;
             }
         });
 
