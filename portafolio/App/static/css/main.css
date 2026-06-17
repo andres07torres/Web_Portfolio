@@ -40,11 +40,18 @@ section[id],
 .navbar-brand {
     font-weight: 700;
     font-size: 1.2rem;
+    letter-spacing: -1px;
+}
+.navbar-brand h1 {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
     background: linear-gradient(45deg, #fff, var(--accent-color));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: -1px;
+    margin: 0;
+    display: inline;
 }
 
 .nav-link {

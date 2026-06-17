@@ -34,6 +34,38 @@ def get_client_ip(request):
 def base(request):
     return render(request, 'index.html')
 
+# ─── SEO: robots.txt ──────────────────────────────────────────
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Disallow: /dashboard/",
+        "Disallow: /login/",
+        "Disallow: /section/",
+        "",
+        "Sitemap: https://" + request.get_host() + "/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+# ─── SEO: sitemap.xml ─────────────────────────────────────────
+def sitemap_xml(request):
+    from django.urls import reverse
+    urls = [
+        {"loc": request.build_absolute_uri(reverse("base")), "changefreq": "weekly", "priority": "1.0"},
+    ]
+    xml_parts = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for u in urls:
+        xml_parts.append("  <url>")
+        xml_parts.append(f"    <loc>{u['loc']}</loc>")
+        xml_parts.append(f"    <changefreq>{u['changefreq']}</changefreq>")
+        xml_parts.append(f"    <priority>{u['priority']}</priority>")
+        xml_parts.append("  </url>")
+    xml_parts.append("</urlset>")
+    return HttpResponse("\n".join(xml_parts), content_type="application/xml")
+
 # ─── Lazy Section Load (AJAX) ────────────────────────────────
 def section_sobre_mi(request):
     acerca_de = AcercaDe.objects.first()
