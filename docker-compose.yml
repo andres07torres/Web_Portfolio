@@ -56,6 +56,7 @@ services:
       - web
     networks:
       - portafolio_net
+      - dokploy-network
 
 # ── Volúmenes persistentes ────────────────────────────────────
 volumes:
@@ -63,7 +64,10 @@ volumes:
   media_data:
   static_data:
 
-# ── Red interna ───────────────────────────────────────────────
+# ── Redes ──────────────────────────────────────────────────────
 networks:
   portafolio_net:
     driver: bridge
+  dokploy-network:
+    external: true
+    name: dokploy-network
