@@ -121,9 +121,12 @@
             const data = await res.json();
 
             if (data.ok) {
-                window.Toast.fire({ icon: 'success', title: data.msg || '¡Mensaje enviado!' });
                 form.reset();
+                document.getElementById('c_nombre').value = '';
+                document.getElementById('c_correo').value = '';
+                document.getElementById('c_mensaje').value = '';
                 charEl.textContent = '0 / 2000';
+                window.Toast.fire({ icon: 'success', title: data.msg || '¡Mensaje enviado!' });
             } else {
                 window.Toast.fire({ icon: res.status === 429 ? 'warning' : 'error', title: data.msg });
             }
