@@ -1,23 +1,6 @@
-services:
+version: "3.8"
 
-  # ── Base de datos PostgreSQL ─────────────────────────────────
-  db:
-    image: postgres:16-alpine
-    container_name: portafolio_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - portafolio_net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+services:
 
   # ── Aplicación Django ────────────────────────────────────────
   web:
@@ -25,27 +8,44 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: portafolio_web
-    restart: unless-stopped
+    restart: always
+    command: >
+      sh -c "
+        python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput &&
+        python manage.py shell -c \"
+from django.contrib.auth import get_user_model;
+import os;
+User = get_user_model();
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin');
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com');
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'Tigre6788');
+u, created = User.objects.get_or_create(username=username);
+u.set_password(password);
+u.email = email;
+u.is_superuser = True;
+u.is_staff = True;
+u.save();
+print(f'Superusuario {username} creado/actualizado')
+\" &&
+        gunicorn portafolio.wsgi:application --bind 0.0.0.0:8000 --timeout 120
+      "
     env_file:
       - .env
-    environment:
-      DB_HOST: db
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles
     expose:
       - "8000"
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - portafolio_net
+      - supabase_net
 
   # ── Nginx (reverse proxy + archivos estáticos) ───────────────
   nginx:
     image: nginx:alpine
     container_name: portafolio_nginx
-    restart: unless-stopped
+    restart: always
     expose:
       - "80"
     volumes:
@@ -60,7 +60,6 @@ services:
 
 # ── Volúmenes persistentes ────────────────────────────────────
 volumes:
-  postgres_data:
   media_data:
   static_data:
 
@@ -71,3 +70,6 @@ networks:
   dokploy-network:
     external: true
     name: dokploy-network
+  supabase_net:
+    external: true
+    name: supabase-supabase-hzjipt_default

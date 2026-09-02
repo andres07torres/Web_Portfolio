@@ -43,10 +43,6 @@ COPY portafolio/ .
 # Crea los directorios necesarios
 RUN mkdir -p /app/media /app/staticfiles
 
-# Script de arranque
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
 EXPOSE 8000
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["gunicorn", "portafolio.wsgi:application", "--bind", "0.0.0.0:8000", "--timeout", "120"]
