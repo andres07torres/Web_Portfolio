@@ -40,6 +40,11 @@ RENDER_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_HOSTNAME)
 
+# Agregar dominio del portafolio si no está
+PORTFOLIO_DOMAIN = os.getenv('PORTFOLIO_DOMAIN', 'portafolio.andr3sdev7.com')
+if PORTFOLIO_DOMAIN not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(PORTFOLIO_DOMAIN)
+
 # CSRF trusted origins para Render y producción
 CSRF_TRUSTED_ORIGINS = [f'https://{h}' for h in ALLOWED_HOSTS if h]
 
@@ -93,7 +98,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=True
+        ssl_require=False
     )
 }
 
