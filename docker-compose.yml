@@ -29,12 +29,12 @@ services:
     env_file:
       - .env
     environment:
-      DB_HOST: db          # Apunta al servicio de Docker, no a localhost
+      DB_HOST: db
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       db:
         condition: service_healthy
@@ -46,8 +46,8 @@ services:
     image: nginx:alpine
     container_name: portafolio_nginx
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_data:/app/staticfiles:ro
