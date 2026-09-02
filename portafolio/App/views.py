@@ -181,7 +181,7 @@ def contacto(request):
     # ── 4. Envío de email ─────────────────────────────────────
     try:
         context = {'nombre': nombre, 'email': correo, 'mensaje': mensaje}
-        html_msg = render_to_string('emails/contacto.html', context)
+        html_msg = render_to_string('emails/contacto.html', context, request=request)
         text_msg = f'De: {nombre} <{correo}>\n\n{mensaje}'
 
         email = EmailMultiAlternatives(

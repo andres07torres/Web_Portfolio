@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,16 +9,17 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f7f6; padding: 40px 20px;">
         <tr>
             <td align="center">
-                <!-- Contenedor Principal (Diseño limpio y claro) -->
+                <!-- Contenedor Principal -->
                 <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-top: 4px solid #00d4ff; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                     
                     <!-- Cabecera -->
                     <tr>
-                        <td style="padding: 35px 40px 25px 40px; border-bottom: 1px solid #f0f0f0;">
-                            <h1 style="margin: 0; color: #1a1a1a; font-size: 22px; font-weight: 600; text-align: left;">
+                        <td style="padding: 35px 40px 25px 40px; border-bottom: 1px solid #f0f0f0; text-align: center;">
+                            <img src="{{ request.scheme }}://{{ request.get_host }}{% static 'img/favicon.webp' %}" alt="Logo" style="max-height: 70px; display: block; margin: 0 auto 15px auto;">
+                            <h1 style="margin: 0; color: #1a1a1a; font-size: 22px; font-weight: 600;">
                                 Tienes un nuevo mensaje
                             </h1>
-                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #666666; text-align: left;">
+                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #666666;">
                                 Enviado desde el formulario de tu portafolio.
                             </p>
                         </td>
@@ -58,7 +60,7 @@
                     <tr>
                         <td style="padding: 20px 40px; background-color: #fafafa; border-top: 1px solid #f0f0f0; border-radius: 0 0 6px 6px;">
                             <p style="margin: 0; font-size: 12px; color: #999999; text-align: left;">
-                                &copy; Andr3sDev7 - Notificación automática.
+                                &copy; 2026 Andr3sDev7. Todos los derechos reservados.
                             </p>
                         </td>
                     </tr>
