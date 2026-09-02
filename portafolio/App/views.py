@@ -185,7 +185,7 @@ def contacto(request):
         text_msg = f'De: {nombre} <{correo}>\n\n{mensaje}'
 
         email = EmailMultiAlternatives(
-            subject=f'[Portafolio] Nuevo mensaje de {nombre}',
+            subject=f'Nuevo mensaje de contacto web | {nombre}',
             body=text_msg,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[settings.DEFAULT_FROM_EMAIL],
