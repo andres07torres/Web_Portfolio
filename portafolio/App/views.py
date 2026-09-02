@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.core.cache import cache
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
@@ -180,13 +180,20 @@ def contacto(request):
 
     # ── 4. Envío de email ─────────────────────────────────────
     try:
-        send_mail(
-            subject  = f'[Portafolio] Nuevo mensaje de {nombre}',
-            message  = f'De: {nombre} <{correo}>\n\n{mensaje}',
-            from_email = settings.DEFAULT_FROM_EMAIL,
-            recipient_list = [settings.DEFAULT_FROM_EMAIL],
-            fail_silently  = False,
+        context = {'nombre': nombre, 'email': correo, 'mensaje': mensaje}
+        html_msg = render_to_string('emails/contacto.html', context)
+        text_msg = f'De: {nombre} <{correo}>\n\n{mensaje}'
+
+        email = EmailMultiAlternatives(
+            subject=f'[Portafolio] Nuevo mensaje de {nombre}',
+            body=text_msg,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[settings.DEFAULT_FROM_EMAIL],
+            reply_to=[correo],  # <-- Esto permite responder directo al cliente desde Gmail
         )
+        email.attach_alternative(html_msg, "text/html")
+        email.send(fail_silently=False)
+
         # Incrementa el contador de rate limit (expira en 1 hora)
         cache.set(rate_key, sent + 1, timeout=3600)
         return JsonResponse({'ok': True, 'msg': '¡Mensaje enviado! Te responderé pronto.'})
