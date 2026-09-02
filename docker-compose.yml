@@ -10,26 +10,10 @@ services:
     container_name: portafolio_web
     restart: always
     command: >
-      sh -c "
-        python manage.py migrate --noinput &&
-        python manage.py collectstatic --noinput &&
-        python manage.py shell -c \"
-from django.contrib.auth import get_user_model;
-import os;
-User = get_user_model();
-username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin');
-email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com');
-password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'Tigre6788');
-u, created = User.objects.get_or_create(username=username);
-u.set_password(password);
-u.email = email;
-u.is_superuser = True;
-u.is_staff = True;
-u.save();
-print(f'Superusuario {username} creado/actualizado')
-\" &&
-        gunicorn portafolio.wsgi:application --bind 0.0.0.0:8000 --timeout 120
-      "
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             python manage.py shell -c \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'Tigre6788')\" &&
+             gunicorn portafolio.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
     env_file:
       - .env
     volumes:
