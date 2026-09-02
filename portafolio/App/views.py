@@ -198,9 +198,10 @@ def contacto(request):
         cache.set(rate_key, sent + 1, timeout=3600)
         return JsonResponse({'ok': True, 'msg': '¡Mensaje enviado! Te responderé pronto.'})
     except Exception as e:
+        print(f"❌ Error SMTP al enviar correo: {e}")
         return JsonResponse({
             'ok': False,
-            'msg': 'Error al enviar el mensaje. Intenta más tarde.'
+            'msg': f'Error al enviar el mensaje. Intenta más tarde.'
         }, status=500)
 
 # ─── Helper ───────────────────────────────────────────────────
