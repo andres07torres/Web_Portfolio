@@ -19,3 +19,4 @@ class ExperienciaAdmin(admin.ModelAdmin):
 class ProyectoAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'tecnologias', 'orden')
     list_editable = ('orden',)
+    filter_horizontal = ('tecnologias_iconos',)

@@ -28,8 +28,15 @@
                             <h4 class="text-white fw-bold h5">{{ proyecto.titulo }}</h4>
                             <p class="footer-text small">{{ proyecto.descripcion }}</p>
                             <div class="mt-auto pt-3">
-                                <div class="tech-stack text-accent fw-medium small">
-                                    {{ proyecto.tecnologias }}
+                                <div class="tech-stack text-accent fw-medium small d-flex flex-wrap gap-3 align-items-center">
+                                    {% if proyecto.tecnologias_iconos.all %}
+                                        {% for tech in proyecto.tecnologias_iconos.all %}
+                                            <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if proyecto.tecnologias %}
+                                        <span>{{ proyecto.tecnologias }}</span>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
