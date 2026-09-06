@@ -232,7 +232,20 @@
           <textarea id="pryDesc" class="form-control" rows="3" placeholder="Descripción breve del proyecto..."></textarea>
         </div>
         <div class="col-12">
-          <label class="form-label">Tecnologías</label>
+          <label class="form-label">Iconos de Tecnologías (Selecciona de tus Habilidades)</label>
+          <div class="d-flex flex-wrap gap-2" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto;">
+            {% for hab in habilidades %}
+              <div class="form-check" style="margin-right: 15px;">
+                <input class="form-check-input hab-checkbox" type="checkbox" id="pry_hab_{{ hab.pk }}" value="{{ hab.pk }}">
+                <label class="form-check-label text-white-50" for="pry_hab_{{ hab.pk }}" style="font-size: 0.85rem;">
+                  <i class="{{ hab.icono_class }}"></i> {{ hab.nombre }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Otras Tecnologías (Texto plano)</label>
           <input type="text" id="pryTecnologias" class="form-control" placeholder="Ej: Python • Django • PostgreSQL">
           <div class="footer-text mt-1" style="font-size:.75rem;">Separa con • o comas.</div>
         </div>
@@ -273,6 +286,13 @@
         <div class="pry-card-body">
             <h6 class="pry-card-title">{{ p.titulo }}</h6>
             <p class="pry-card-desc">{{ p.descripcion }}</p>
+            {% if p.tecnologias_iconos.all %}
+            <div class="pry-card-tags mb-1">
+                {% for t in p.tecnologias_iconos.all %}
+                <span class="pry-tag"><i class="{{ t.icono_class }}"></i> {{ t.nombre }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% if p.tecnologias %}
             <div class="pry-card-tags">
                 {% for tag in p.tecnologias.split %}
@@ -287,6 +307,7 @@
                     data-titulo="{{ p.titulo }}"
                     data-desc="{{ p.descripcion }}"
                     data-tecs="{{ p.tecnologias }}"
+                    data-tecs-ids="{% for t in p.tecnologias_iconos.all %}{{ t.pk }}{% if not forloop.last %},{% endif %}{% endfor %}"
                     data-github="{{ p.link_github }}"
                     data-despliegue="{{ p.link_despliegue }}"
                     data-icono="{{ p.icono_class }}"
@@ -400,6 +421,7 @@ function openPryModal() {
     document.getElementById('pryGithub').value   = '';
     document.getElementById('pryDespliegue').value = '';
     document.getElementById('pryOrden').value    = '0';
+    document.querySelectorAll('.hab-checkbox').forEach(cb => cb.checked = false);
     document.getElementById('pryModalTitle').textContent = 'Nuevo Proyecto';
     prySelectedIcon = '';
     document.getElementById('pryPreview').style.display   = 'none';
@@ -420,6 +442,7 @@ function preparePryEdit(btn) {
     const titulo = btn.getAttribute('data-titulo');
     const desc = btn.getAttribute('data-desc');
     const tecs = btn.getAttribute('data-tecs');
+    const tecsIds = btn.getAttribute('data-tecs-ids') || '';
     const github = btn.getAttribute('data-github');
     const despliegue = btn.getAttribute('data-despliegue');
     const icono = btn.getAttribute('data-icono');
@@ -434,6 +457,10 @@ function preparePryEdit(btn) {
     document.getElementById('pryGithub').value = github;
     document.getElementById('pryDespliegue').value = despliegue;
     document.getElementById('pryOrden').value = orden;
+
+    document.querySelectorAll('.hab-checkbox').forEach(cb => {
+        cb.checked = tecsIds.split(',').includes(cb.value);
+    });
 
     if (icono) {
         // Encontrar label del icono si es posible, o usar el class
@@ -503,6 +530,10 @@ async function submitPry(e) {
     fd.append('orden', orden);
     if (pk) fd.append('pk', pk);
 
+    document.querySelectorAll('.hab-checkbox:checked').forEach(cb => {
+        fd.append('tecnologias_iconos', cb.value);
+    });
+
     try {
         const res  = await fetch(PRY_AJAX_URL, { method:'POST', body:fd });
         const data = await res.json();
@@ -532,6 +563,11 @@ function insertOrUpdatePryCard(data) {
         <div class="pry-card-body">
             <h6 class="pry-card-title">${data.titulo}</h6>
             <p class="pry-card-desc">${data.descripcion}</p>
+            ${data.tecnologias_iconos_html ? `
+                <div class="pry-card-tags mb-1">
+                    ${data.tecnologias_iconos_html}
+                </div>
+            ` : ''}
             ${data.tecnologias ? `
                 <div class="pry-card-tags">
                     ${data.tecnologias.split(/[ •,]+/).filter(t => t).map(t => `<span class="pry-tag">${t}</span>`).join('')}
@@ -544,6 +580,7 @@ function insertOrUpdatePryCard(data) {
                     data-titulo="${(data.titulo||'').replace(/"/g,'&quot;')}"
                     data-desc="${(data.descripcion||'').replace(/"/g,'&quot;')}"
                     data-tecs="${(data.tecnologias||'').replace(/"/g,'&quot;')}"
+                    data-tecs-ids="${data.tecnologias_ids||''}"
                     data-github="${(data.link_github||'').replace(/"/g,'&quot;')}"
                     data-despliegue="${(data.link_despliegue||'').replace(/"/g,'&quot;')}"
                     data-icono="${(data.icono_class||'').replace(/"/g,'&quot;')}"

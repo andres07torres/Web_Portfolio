@@ -389,6 +389,7 @@ def dashboard_proyectos(request):
     return render(request, 'dashboard/proyectos.html', {
         'active_nav': 'proyectos',
         'proyectos': Proyecto.objects.all().order_by('orden'),
+        'habilidades': Habilidad.objects.all().order_by('nombre'),
     })
 
 @admin_required
@@ -429,6 +430,11 @@ def dashboard_proyecto_ajax(request, pk=None):
     if form.is_valid():
         obj = form.save()
         from django.urls import reverse
+        tecs_ids_str = ",".join(str(t.pk) for t in obj.tecnologias_iconos.all())
+        tecs_html = ""
+        for t in obj.tecnologias_iconos.all():
+            tecs_html += f'<span class="pry-tag"><i class="{t.icono_class}"></i> {t.nombre}</span>'
+
         return JsonResponse({
             'success': True,
             'accion': 'actualizado' if pk else 'creado',
@@ -437,6 +443,8 @@ def dashboard_proyecto_ajax(request, pk=None):
             'descripcion': obj.descripcion,
             'icono_class': obj.icono_class,
             'tecnologias': obj.tecnologias,
+            'tecnologias_ids': tecs_ids_str,
+            'tecnologias_iconos_html': tecs_html,
             'link_github': obj.link_github,
             'link_despliegue': obj.link_despliegue,
             'orden': obj.orden,
