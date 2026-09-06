@@ -232,14 +232,20 @@
           <textarea id="pryDesc" class="form-control" rows="3" placeholder="Descripción breve del proyecto..."></textarea>
         </div>
         <div class="col-12">
-          <label class="form-label" style="font-size:.82rem;">Iconos de Tecnologías (Habilidades)</label>
-          <div class="p-icon-grid" style="border: 1px solid rgba(0,212,255,0.18); max-height: 180px; padding: 0.8rem;">
-            {% for hab in habilidades %}
-              <label class="p-icon-item m-0" title="{{ hab.nombre }}" style="cursor: pointer; position: relative;">
-                <input class="hab-checkbox d-none" type="checkbox" id="pry_hab_{{ hab.pk }}" value="{{ hab.pk }}" onchange="this.parentElement.classList.toggle('selected', this.checked)">
-                <i class="{{ hab.icono_class }}"></i>
-              </label>
-            {% endfor %}
+          <label class="form-label" style="font-size:.82rem;">Iconos de Tecnologías (Múltiple selección)</label>
+          <div id="pryMultiPickerWrap">
+            <input type="text" class="p-picker-search" id="pryMultiSearch" placeholder="🔍  Buscar íconos..." oninput="filterPryMultiIcons()">
+            <div class="p-cat-row" id="pryMultiCats">
+              <button class="p-cat-btn active" onclick="filterPryMultiCat('todos',this)" type="button">Todos</button>
+              <button class="p-cat-btn" onclick="filterPryMultiCat('lenguajes',this)" type="button">Lenguajes</button>
+              <button class="p-cat-btn" onclick="filterPryMultiCat('frameworks',this)" type="button">Frameworks</button>
+              <button class="p-cat-btn" onclick="filterPryMultiCat('bases-de-datos',this)" type="button">Bases de datos</button>
+              <button class="p-cat-btn" onclick="filterPryMultiCat('herramientas',this)" type="button">Herramientas</button>
+              <button class="p-cat-btn" onclick="filterPryMultiCat('cloud',this)" type="button">Cloud</button>
+              <button class="p-cat-btn" onclick="filterPryMultiCat('ia',this)" type="button">IA / Agentes</button>
+              <button class="p-cat-btn" onclick="filterPryMultiCat('general',this)" type="button">General</button>
+            </div>
+            <div class="p-icon-grid" id="pryMultiIconGrid" style="max-height: 180px;"></div>
           </div>
         </div>
         <div class="col-12">
@@ -305,7 +311,7 @@
                     data-titulo="{{ p.titulo }}"
                     data-desc="{{ p.descripcion }}"
                     data-tecs="{{ p.tecnologias }}"
-                    data-tecs-ids="{% for t in p.tecnologias_iconos.all %}{{ t.pk }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                    data-tecs-classes="{% for t in p.tecnologias_iconos.all %}{{ t.icono_class }}{% if not forloop.last %},{% endif %}{% endfor %}"
                     data-github="{{ p.link_github }}"
                     data-despliegue="{{ p.link_despliegue }}"
                     data-icono="{{ p.icono_class }}"
@@ -409,8 +415,47 @@ const PRY_ICONS = [
 
 let prySelectedIcon = '';
 let pryCurrentCat   = 'todos';
+let prySelectedMultiIcons = []; // array of selected icon objects {class, label}
+let pryMultiCurrentCat = 'todos';
 const PRY_AJAX_URL  = '{% url "dashboard_proyecto_nueva_ajax" %}';
 const PRY_CSRF      = '{{ csrf_token }}';
+
+// ── Lógica Multi Picker ─────────────────────────────────────
+function renderPryMultiIcons(list) {
+    const g = document.getElementById('pryMultiIconGrid');
+    if (!list.length) { g.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.25);padding:1rem;font-size:.82rem;">Sin resultados</div>'; return; }
+    
+    g.innerHTML = list.map(i => {
+        const isSelected = prySelectedMultiIcons.some(sel => sel.class === i.class);
+        return `
+        <div class="p-icon-item ${isSelected ? 'selected' : ''}"
+             onclick="togglePryMultiIcon('${i.class}','${i.label}', this)" title="${i.label}">
+            <i class="${i.class}"></i>
+        </div>`;
+    }).join('');
+}
+
+function filterPryMultiIcons() {
+    const q = document.getElementById('pryMultiSearch').value.toLowerCase();
+    renderPryMultiIcons(PRY_ICONS.filter(i=>(pryMultiCurrentCat==='todos'||i.cat===pryMultiCurrentCat)&&(!q||i.label.toLowerCase().includes(q))));
+}
+
+function filterPryMultiCat(cat, btn) {
+    pryMultiCurrentCat = cat;
+    document.querySelectorAll('#pryMultiCats .p-cat-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); filterPryMultiIcons();
+}
+
+function togglePryMultiIcon(cls, label, element) {
+    const idx = prySelectedMultiIcons.findIndex(sel => sel.class === cls);
+    if (idx >= 0) {
+        prySelectedMultiIcons.splice(idx, 1);
+        element.classList.remove('selected');
+    } else {
+        prySelectedMultiIcons.push({class: cls, label: label});
+        element.classList.add('selected');
+    }
+}
 
 function openPryModal() {
     document.getElementById('pryPk').value       = '';
@@ -421,10 +466,12 @@ function openPryModal() {
     document.getElementById('pryGithub').value   = '';
     document.getElementById('pryDespliegue').value = '';
     document.getElementById('pryOrden').value    = '0';
-    document.querySelectorAll('.hab-checkbox').forEach(cb => {
-        cb.checked = false;
-        cb.parentElement.classList.remove('selected');
-    });
+    prySelectedMultiIcons = [];
+    document.getElementById('pryMultiSearch').value = '';
+    pryMultiCurrentCat = 'todos';
+    document.querySelectorAll('#pryMultiCats .p-cat-btn').forEach(b => b.classList.toggle('active', b.textContent === 'Todos'));
+    renderPryMultiIcons(PRY_ICONS);
+    
     document.getElementById('pryModalTitle').textContent = 'Nuevo Proyecto';
     prySelectedIcon = '';
     document.getElementById('pryPreview').style.display   = 'none';
@@ -445,7 +492,7 @@ function preparePryEdit(btn) {
     const titulo = btn.getAttribute('data-titulo');
     const desc = btn.getAttribute('data-desc');
     const tecs = btn.getAttribute('data-tecs');
-    const tecsIds = btn.getAttribute('data-tecs-ids') || '';
+    const tecsClasses = btn.getAttribute('data-tecs-classes') || '';
     const github = btn.getAttribute('data-github');
     const despliegue = btn.getAttribute('data-despliegue');
     const icono = btn.getAttribute('data-icono');
@@ -461,10 +508,14 @@ function preparePryEdit(btn) {
     document.getElementById('pryDespliegue').value = despliegue;
     document.getElementById('pryOrden').value = orden;
 
-    document.querySelectorAll('.hab-checkbox').forEach(cb => {
-        cb.checked = tecsIds.split(',').includes(cb.value);
-        cb.parentElement.classList.toggle('selected', cb.checked);
-    });
+    prySelectedMultiIcons = [];
+    if (tecsClasses) {
+        tecsClasses.split(',').forEach(cls => {
+            const iconObj = PRY_ICONS.find(i => i.class === cls);
+            if (iconObj) prySelectedMultiIcons.push({class: iconObj.class, label: iconObj.label});
+        });
+    }
+    renderPryMultiIcons(PRY_ICONS);
 
     if (icono) {
         // Encontrar label del icono si es posible, o usar el class
@@ -534,9 +585,7 @@ async function submitPry(e) {
     fd.append('orden', orden);
     if (pk) fd.append('pk', pk);
 
-    document.querySelectorAll('.hab-checkbox:checked').forEach(cb => {
-        fd.append('tecnologias_iconos', cb.value);
-    });
+    fd.append('tecnologias_json', JSON.stringify(prySelectedMultiIcons));
 
     try {
         const res  = await fetch(PRY_AJAX_URL, { method:'POST', body:fd });
@@ -584,7 +633,7 @@ function insertOrUpdatePryCard(data) {
                     data-titulo="${(data.titulo||'').replace(/"/g,'&quot;')}"
                     data-desc="${(data.descripcion||'').replace(/"/g,'&quot;')}"
                     data-tecs="${(data.tecnologias||'').replace(/"/g,'&quot;')}"
-                    data-tecs-ids="${data.tecnologias_ids||''}"
+                    data-tecs-classes="${data.tecnologias_classes||''}"
                     data-github="${(data.link_github||'').replace(/"/g,'&quot;')}"
                     data-despliegue="${(data.link_despliegue||'').replace(/"/g,'&quot;')}"
                     data-icono="${(data.icono_class||'').replace(/"/g,'&quot;')}"

@@ -429,8 +429,28 @@ def dashboard_proyecto_ajax(request, pk=None):
 
     if form.is_valid():
         obj = form.save()
+        
+        # Procesar tecnologias múltiples desde el JSON enviado
+        tecs_json = request.POST.get('tecnologias_json')
+        if tecs_json:
+            import json
+            try:
+                tecs_data = json.loads(tecs_json)
+                habs_to_add = []
+                for t in tecs_data:
+                    # Crear la habilidad si no existe
+                    hab, created = Habilidad.objects.get_or_create(
+                        icono_class=t['class'],
+                        defaults={'nombre': t['label']}
+                    )
+                    habs_to_add.append(hab)
+                obj.tecnologias_iconos.set(habs_to_add)
+            except Exception as e:
+                pass # Fallo silencioso si hay error de JSON
+
         from django.urls import reverse
         tecs_ids_str = ",".join(str(t.pk) for t in obj.tecnologias_iconos.all())
+        tecs_classes_str = ",".join(str(t.icono_class) for t in obj.tecnologias_iconos.all())
         tecs_html = ""
         for t in obj.tecnologias_iconos.all():
             tecs_html += f'<span class="pry-tag"><i class="{t.icono_class}"></i> {t.nombre}</span>'
@@ -444,6 +464,7 @@ def dashboard_proyecto_ajax(request, pk=None):
             'icono_class': obj.icono_class,
             'tecnologias': obj.tecnologias,
             'tecnologias_ids': tecs_ids_str,
+            'tecnologias_classes': tecs_classes_str,
             'tecnologias_iconos_html': tecs_html,
             'link_github': obj.link_github,
             'link_despliegue': obj.link_despliegue,
