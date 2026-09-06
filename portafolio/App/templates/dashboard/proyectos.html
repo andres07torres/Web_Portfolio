@@ -232,15 +232,13 @@
           <textarea id="pryDesc" class="form-control" rows="3" placeholder="Descripción breve del proyecto..."></textarea>
         </div>
         <div class="col-12">
-          <label class="form-label">Iconos de Tecnologías (Selecciona de tus Habilidades)</label>
-          <div class="d-flex flex-wrap gap-2" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto;">
+          <label class="form-label" style="font-size:.82rem;">Iconos de Tecnologías (Habilidades)</label>
+          <div class="p-icon-grid" style="border: 1px solid rgba(0,212,255,0.18); max-height: 180px; padding: 0.8rem;">
             {% for hab in habilidades %}
-              <div class="form-check" style="margin-right: 15px;">
-                <input class="form-check-input hab-checkbox" type="checkbox" id="pry_hab_{{ hab.pk }}" value="{{ hab.pk }}">
-                <label class="form-check-label text-white-50" for="pry_hab_{{ hab.pk }}" style="font-size: 0.85rem;">
-                  <i class="{{ hab.icono_class }}"></i> {{ hab.nombre }}
-                </label>
-              </div>
+              <label class="p-icon-item m-0" title="{{ hab.nombre }}" style="cursor: pointer; position: relative;">
+                <input class="hab-checkbox d-none" type="checkbox" id="pry_hab_{{ hab.pk }}" value="{{ hab.pk }}" onchange="this.parentElement.classList.toggle('selected', this.checked)">
+                <i class="{{ hab.icono_class }}"></i>
+              </label>
             {% endfor %}
           </div>
         </div>
@@ -376,6 +374,7 @@ const PRY_ICONS = [
     { class:'devicon-redis-plain colored',          label:'Redis',        cat:'bases-de-datos' },
     { class:'devicon-sqlite-plain colored',         label:'SQLite',       cat:'bases-de-datos' },
     { class:'devicon-firebase-plain colored',       label:'Firebase',     cat:'bases-de-datos' },
+    { class:'devicon-supabase-plain colored',       label:'Supabase',     cat:'bases-de-datos' },
     { class:'devicon-git-plain colored',            label:'Git',          cat:'herramientas' },
     { class:'devicon-github-original',              label:'GitHub',       cat:'herramientas' },
     { class:'devicon-docker-plain colored',         label:'Docker',       cat:'herramientas' },
@@ -388,6 +387,7 @@ const PRY_ICONS = [
     { class:'devicon-googlecloud-plain colored',    label:'GCP',          cat:'cloud' },
     { class:'devicon-kubernetes-plain colored',     label:'Kubernetes',   cat:'cloud' },
     { class:'devicon-heroku-plain colored',         label:'Heroku',       cat:'cloud' },
+    { class:'bi bi-cloud-arrow-up-fill',            label:'Render',       cat:'cloud' },
     { class:'bi bi-robot',                          label:'AI Robot',     cat:'ia' },
     { class:'bi bi-magic',                          label:'AI Magic',     cat:'ia' },
     { class:'bi bi-stars',                          label:'AI Stars',     cat:'ia' },
@@ -421,7 +421,10 @@ function openPryModal() {
     document.getElementById('pryGithub').value   = '';
     document.getElementById('pryDespliegue').value = '';
     document.getElementById('pryOrden').value    = '0';
-    document.querySelectorAll('.hab-checkbox').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.hab-checkbox').forEach(cb => {
+        cb.checked = false;
+        cb.parentElement.classList.remove('selected');
+    });
     document.getElementById('pryModalTitle').textContent = 'Nuevo Proyecto';
     prySelectedIcon = '';
     document.getElementById('pryPreview').style.display   = 'none';
@@ -460,6 +463,7 @@ function preparePryEdit(btn) {
 
     document.querySelectorAll('.hab-checkbox').forEach(cb => {
         cb.checked = tecsIds.split(',').includes(cb.value);
+        cb.parentElement.classList.toggle('selected', cb.checked);
     });
 
     if (icono) {
