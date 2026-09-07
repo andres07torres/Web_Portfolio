@@ -53,30 +53,19 @@
                             <p class="footer-text small">{{ proyecto.descripcion }}</p>
                             <div class="mt-auto pt-3">
                                     {% if proyecto.tecnologias_iconos.all %}
-                                        {% with total_tecs=proyecto.tecnologias_iconos.count %}
-                                            {% if total_tecs > 7 %}
-                                                <!-- Carrusel animado para muchas tecnologías -->
-                                                <div class="tech-marquee-wrapper w-100">
-                                                    <div class="tech-marquee-track text-accent fw-medium small">
-                                                        <!-- Grupo 1 -->
-                                                        {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
-                                                            <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
-                                                        {% endfor %}
-                                                        <!-- Grupo 2 (Duplicado para efecto infinito) -->
-                                                        {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
-                                                            <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
-                                                        {% endfor %}
-                                                    </div>
-                                                </div>
-                                            {% else %}
-                                                <!-- Vista estática normal para 7 o menos -->
-                                                <div class="tech-stack text-accent fw-medium small d-flex align-items-center gap-3">
-                                                    {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
-                                                        <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                        {% endwith %}
+                                        <!-- Carrusel animado para tecnologías -->
+                                        <div class="tech-marquee-wrapper w-100">
+                                            <div class="tech-marquee-track text-accent fw-medium small">
+                                                <!-- Grupo 1 -->
+                                                {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
+                                                    <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
+                                                {% endfor %}
+                                                <!-- Grupo 2 (Duplicado para efecto infinito) -->
+                                                {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
+                                                    <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
                                     {% endif %}
                             </div>
                         </div>
