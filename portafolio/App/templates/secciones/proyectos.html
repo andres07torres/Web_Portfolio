@@ -1,4 +1,40 @@
 <section id="proyectos" class="py-5">
+    <style>
+        .tech-scroll-container {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 0.75rem;
+            align-items: center;
+            overflow-x: auto;
+            padding-bottom: 0.5rem; /* Espacio para no cortar iconos al hacer scroll */
+            margin-bottom: -0.5rem; /* Compensar el padding */
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: rgba(0, 212, 255, 0.3) transparent;
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        /* Scrollbar sutil para desktop web */
+        .tech-scroll-container::-webkit-scrollbar {
+            height: 4px;
+        }
+        .tech-scroll-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+        .tech-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3); /* Color acento semitransparente */
+            border-radius: 4px;
+        }
+        .tech-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.6);
+        }
+        .tech-scroll-container > i {
+            flex-shrink: 0; /* Evita que los iconos se encojan */
+        }
+        .tech-scroll-container > span {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+    </style>
     <div class="container">
         <div class="mb-5">
             <h2 class="display-5 fw-bold mb-2">Mis <span class="text-accent">Proyectos</span></h2>
@@ -28,7 +64,7 @@
                             <h4 class="text-white fw-bold h5">{{ proyecto.titulo }}</h4>
                             <p class="footer-text small">{{ proyecto.descripcion }}</p>
                             <div class="mt-auto pt-3">
-                                <div class="tech-stack text-accent fw-medium small d-flex flex-wrap gap-3 align-items-center">
+                                <div class="tech-stack text-accent fw-medium small tech-scroll-container">
                                     {% if proyecto.tecnologias_iconos.all %}
                                         {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
                                             <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
