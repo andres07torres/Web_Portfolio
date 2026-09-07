@@ -425,7 +425,15 @@ def dashboard_proyecto_ajax(request, pk=None):
 
     pk = pk or request.POST.get('pk')
     obj = get_object_or_404(Proyecto, pk=pk) if pk else None
-    form = ProyectoForm(request.POST, instance=obj)
+    
+    # Hacer una copia mutable de request.POST para limpiar strings 'None'
+    post_data = request.POST.copy()
+    if post_data.get('link_github') == 'None':
+        post_data['link_github'] = ''
+    if post_data.get('link_despliegue') == 'None':
+        post_data['link_despliegue'] = ''
+
+    form = ProyectoForm(post_data, instance=obj)
 
     if form.is_valid():
         obj = form.save()

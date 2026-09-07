@@ -302,9 +302,9 @@
                     data-titulo="{{ p.titulo }}"
                     data-desc="{{ p.descripcion }}"
                     data-tecs-classes="{% for t in p.tecnologias_iconos.all %}{{ t.icono_class }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                    data-github="{{ p.link_github }}"
-                    data-despliegue="{{ p.link_despliegue }}"
-                    data-icono="{{ p.icono_class }}"
+                    data-github="{{ p.link_github|default_if_none:'' }}"
+                    data-despliegue="{{ p.link_despliegue|default_if_none:'' }}"
+                    data-icono="{{ p.icono_class|default_if_none:'' }}"
                     data-orden="{{ p.orden }}"
                     title="Editar"
                     class="btn-action-pry">
