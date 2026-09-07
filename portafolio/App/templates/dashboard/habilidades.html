@@ -183,6 +183,9 @@
 {# ── Barra de acciones ─────────────────────── #}
 <div class="d-flex align-items-center justify-content-end gap-2 mb-4 action-bar-responsive">
     <button onclick="openHabModal()" class="btn-accent">Nueva habilidad</button>
+    <button onclick="ordenarAlfabeticamente('habilidad')" class="btn-ghost" style="border-color:rgba(0,212,255,0.3);color:rgba(0,212,255,0.8);font-size:.8rem;">
+        <i class="bi bi-sort-alpha-down me-1"></i> Ordenar A-Z
+    </button>
     <a href="javascript:void(0)"
        data-reset-url="{% url 'dashboard_reset_habilidades' %}"
        data-reset-label="todas las habilidades"

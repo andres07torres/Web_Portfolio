@@ -661,6 +661,41 @@
         });
     }
 
+    // ── Ordenar alfabéticamente ────────────
+    function ordenarAlfabeticamente(modelo) {
+        Swal.fire({
+            title: '¿Ordenar alfabéticamente?',
+            text: 'Se ordenarán los elementos y se guardará el nuevo orden.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, ordenar',
+            cancelButtonText: 'Cancelar',
+            background: 'rgba(12,12,12,0.98)',
+            color: '#f8f9fa',
+            confirmButtonColor: '#00d4ff',
+            cancelButtonColor: 'rgba(255,255,255,0.08)',
+            iconColor: '#00d4ff',
+            reverseButtons: true,
+        }).then(result => {
+            if (result.isConfirmed) {
+                fetch('{% url "dashboard_ordenar_alfabeticamente" %}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: JSON.stringify({ modelo: modelo })
+                }).then(r => r.json()).then(d => {
+                    if (d.success) {
+                        Toast.fire({ icon: 'success', title: 'Ordenado correctamente' });
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        Toast.fire({ icon: 'error', title: d.error || 'Error al ordenar' });
+                    }
+                }).catch(() => {
+                    Toast.fire({ icon: 'error', title: 'Error de conexión' });
+                });
+            }
+        });
+    }
+
     // Mobile sidebar
     function openSidebar() {
         document.getElementById('sidebar').classList.add('open');

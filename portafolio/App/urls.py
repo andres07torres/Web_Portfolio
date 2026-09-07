@@ -45,6 +45,7 @@ urlpatterns = [
 
     # Reordenar (SortableJS)
     path('dashboard/reordenar/', views.dashboard_reordenar, name='dashboard_reordenar'),
+    path('dashboard/ordenar-alfabeticamente/', views.dashboard_ordenar_alfabeticamente, name='dashboard_ordenar_alfabeticamente'),
 
     # Reset por defecto
     path('dashboard/acerca-de/reset/', views.dashboard_reset_acercade, name='dashboard_reset_acercade'),

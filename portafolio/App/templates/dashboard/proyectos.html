@@ -175,6 +175,9 @@
 {# ── Barra de acciones ──────────────────────────────────── #}
 <div class="d-flex align-items-center justify-content-end gap-2 mb-4 action-bar-responsive">
     <button onclick="openPryModal()" class="btn-accent">Nuevo proyecto</button>
+    <button onclick="ordenarAlfabeticamente('proyecto')" class="btn-ghost" style="border-color:rgba(0,212,255,0.3);color:rgba(0,212,255,0.8);font-size:.8rem;">
+        <i class="bi bi-sort-alpha-down me-1"></i> Ordenar A-Z
+    </button>
     <a href="javascript:void(0)"
        data-reset-url="{% url 'dashboard_reset_proyectos' %}"
        data-reset-label="todos los proyectos"
@@ -292,7 +295,7 @@
             <p class="pry-card-desc">{{ p.descripcion }}</p>
             {% if p.tecnologias_iconos.all %}
             <div class="pry-card-tags mb-1">
-                {% for t in p.tecnologias_iconos.all %}
+                {% for t in p.tecnologias_iconos.all|dictsort:"nombre" %}
                 <span class="pry-tag"><i class="{{ t.icono_class }}"></i> {{ t.nombre }}</span>
                 {% endfor %}
             </div>

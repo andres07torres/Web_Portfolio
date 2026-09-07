@@ -30,7 +30,7 @@
                             <div class="mt-auto pt-3">
                                 <div class="tech-stack text-accent fw-medium small d-flex flex-wrap gap-3 align-items-center">
                                     {% if proyecto.tecnologias_iconos.all %}
-                                        {% for tech in proyecto.tecnologias_iconos.all %}
+                                        {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
                                             <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
                                         {% endfor %}
                                     {% endif %}

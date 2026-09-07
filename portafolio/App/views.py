@@ -452,7 +452,7 @@ def dashboard_proyecto_ajax(request, pk=None):
         tecs_ids_str = ",".join(str(t.pk) for t in obj.tecnologias_iconos.all())
         tecs_classes_str = ",".join(str(t.icono_class) for t in obj.tecnologias_iconos.all())
         tecs_html = ""
-        for t in obj.tecnologias_iconos.all():
+        for t in obj.tecnologias_iconos.all().order_by('nombre'):
             tecs_html += f'<span class="pry-tag"><i class="{t.icono_class}"></i> {t.nombre}</span>'
 
         return JsonResponse({
@@ -507,6 +507,40 @@ def dashboard_reordenar(request):
         else:
             ModelClass.objects.filter(pk=pk).update(orden=idx)
 
+    return JsonResponse({'success': True})
+
+# ─── Ordenar Alfabéticamente ───────────────────────────────────
+@admin_required
+def dashboard_ordenar_alfabeticamente(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido.'}, status=400)
+
+    modelo = data.get('modelo')
+    
+    models_map = {
+        'habilidad': (Habilidad, 'nombre'),
+        'experiencia': (Experiencia, 'empresa'),
+        'proyecto': (Proyecto, 'titulo'),
+    }
+
+    if modelo not in models_map:
+        return JsonResponse({'success': False, 'error': 'Modelo no válido.'}, status=400)
+        
+    ModelClass, sort_field = models_map[modelo]
+    items = ModelClass.objects.all().order_by(sort_field)
+    
+    for idx, item in enumerate(items):
+        if modelo == 'experiencia':
+            item.orden = len(items) - 1 - idx
+        else:
+            item.orden = idx
+        item.save()
+        
     return JsonResponse({'success': True})
 
 # ─── Reset por defecto ────────────────────────────────────────
