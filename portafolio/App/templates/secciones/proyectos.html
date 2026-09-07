@@ -1,19 +1,26 @@
 <section id="proyectos" class="py-5">
     <style>
-        .tech-more-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            color: var(--accent-color);
-            font-size: 0.75rem;
-            font-weight: bold;
-            flex-shrink: 0;
-            cursor: help;
+        /* Estilos del carrusel de tecnologías */
+        .tech-marquee-wrapper {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            /* Efecto difuminado a los bordes */
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .tech-marquee-track {
+            display: flex;
+            gap: 1.5rem;
+            width: max-content;
+            animation: techMarquee 15s linear infinite;
+        }
+        .tech-marquee-wrapper:hover .tech-marquee-track {
+            animation-play-state: paused;
+        }
+        @keyframes techMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
     </style>
     <div class="container">
@@ -45,21 +52,32 @@
                             <h4 class="text-white fw-bold h5">{{ proyecto.titulo }}</h4>
                             <p class="footer-text small">{{ proyecto.descripcion }}</p>
                             <div class="mt-auto pt-3">
-                                <div class="tech-stack text-accent fw-medium small d-flex align-items-center gap-3">
                                     {% if proyecto.tecnologias_iconos.all %}
                                         {% with total_tecs=proyecto.tecnologias_iconos.count %}
-                                            {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre"|slice:":7" %}
-                                                <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
-                                            {% endfor %}
-                                            
                                             {% if total_tecs > 7 %}
-                                                <div class="tech-more-badge" title="{% for t in proyecto.tecnologias_iconos.all|dictsort:'nombre'|slice:'7:' %}{{ t.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}">
-                                                    +{{ total_tecs|add:"-7" }}
+                                                <!-- Carrusel animado para muchas tecnologías -->
+                                                <div class="tech-marquee-wrapper w-100">
+                                                    <div class="tech-marquee-track text-accent fw-medium small">
+                                                        <!-- Grupo 1 -->
+                                                        {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
+                                                            <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
+                                                        {% endfor %}
+                                                        <!-- Grupo 2 (Duplicado para efecto infinito) -->
+                                                        {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
+                                                            <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <!-- Vista estática normal para 7 o menos -->
+                                                <div class="tech-stack text-accent fw-medium small d-flex align-items-center gap-3">
+                                                    {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
+                                                        <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
+                                                    {% endfor %}
                                                 </div>
                                             {% endif %}
                                         {% endwith %}
                                     {% endif %}
-                                </div>
                             </div>
                         </div>
                     </div>
