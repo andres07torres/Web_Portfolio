@@ -8,24 +8,12 @@
             overflow-x: auto;
             padding-bottom: 0.5rem; /* Espacio para no cortar iconos al hacer scroll */
             margin-bottom: -0.5rem; /* Compensar el padding */
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: rgba(0, 212, 255, 0.3) transparent;
+            scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none;  /* IE and Edge */
         }
-        /* Scrollbar sutil para desktop web */
+        /* Ocultar scrollbar completamente en todos los navegadores */
         .tech-scroll-container::-webkit-scrollbar {
-            height: 4px;
-        }
-        .tech-scroll-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 4px;
-        }
-        .tech-scroll-container::-webkit-scrollbar-thumb {
-            background: rgba(0, 212, 255, 0.3); /* Color acento semitransparente */
-            border-radius: 4px;
-        }
-        .tech-scroll-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.6);
+            display: none;
         }
         .tech-scroll-container > i {
             flex-shrink: 0; /* Evita que los iconos se encojan */
