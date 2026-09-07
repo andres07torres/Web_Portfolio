@@ -1,26 +1,39 @@
 <section id="proyectos" class="py-5">
     <style>
-        /* Estilos del carrusel de tecnologías */
-        .tech-marquee-wrapper {
-            overflow: hidden;
-            position: relative;
-            width: 100%;
-            /* Efecto difuminado a los bordes */
-            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-        }
-        .tech-marquee-track {
+        /* Estilos de Íconos Superpuestos (Avatar Stack) */
+        .tech-avatar-stack {
             display: flex;
-            gap: 1.5rem;
-            width: max-content;
-            animation: techMarquee 15s linear infinite;
+            align-items: center;
+            padding-left: 0.2rem;
+            padding-top: 0.5rem; /* Para que al elevarse en hover no se corte */
         }
-        .tech-marquee-wrapper:hover .tech-marquee-track {
-            animation-play-state: paused;
+        .tech-avatar-stack .tech-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #1a1a1a; /* Fondo sólido oscuro para tapar el ícono de atrás */
+            border: 2px solid #2a2a2a; /* Borde sutil para separar */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: -12px; /* Aquí ocurre la magia de la superposición */
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), z-index 0s, border-color 0.2s, color 0.2s;
+            position: relative;
+            cursor: pointer;
+            color: #00d4ff; /* Color de acento */
         }
-        @keyframes techMarquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        .tech-avatar-stack .tech-avatar:first-child {
+            margin-left: 0;
+        }
+        .tech-avatar-stack .tech-avatar:hover {
+            transform: translateY(-6px) scale(1.15); /* Salta hacia arriba y se agranda */
+            z-index: 10;
+            border-color: #00d4ff;
+            color: #fff;
+            background-color: rgba(0, 212, 255, 0.2);
+        }
+        .tech-avatar-stack .tech-avatar i {
+            font-size: 1.1rem;
         }
     </style>
     <div class="container">
@@ -53,18 +66,13 @@
                             <p class="footer-text small">{{ proyecto.descripcion }}</p>
                             <div class="mt-auto pt-3">
                                     {% if proyecto.tecnologias_iconos.all %}
-                                        <!-- Carrusel animado para tecnologías -->
-                                        <div class="tech-marquee-wrapper w-100">
-                                            <div class="tech-marquee-track text-accent fw-medium small">
-                                                <!-- Grupo 1 -->
-                                                {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
-                                                    <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
-                                                {% endfor %}
-                                                <!-- Grupo 2 (Duplicado para efecto infinito) -->
-                                                {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
-                                                    <i class="{{ tech.icono_class }} fs-4" title="{{ tech.nombre }}"></i>
-                                                {% endfor %}
-                                            </div>
+                                        <!-- Íconos Superpuestos (Avatar Stack) -->
+                                        <div class="tech-avatar-stack">
+                                            {% for tech in proyecto.tecnologias_iconos.all|dictsort:"nombre" %}
+                                                <div class="tech-avatar" title="{{ tech.nombre }}">
+                                                    <i class="{{ tech.icono_class }}"></i>
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     {% endif %}
                             </div>
