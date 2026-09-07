@@ -253,15 +253,21 @@
                 l.addEventListener('click', (e) => {
                     const href = l.getAttribute('href');
                     if (!href || !href.startsWith('#')) return;
+                    
+                    // Prevenir que el '#hash' se agregue a la URL (Enmascarar ruta)
+                    e.preventDefault();
+                    
                     const target = document.querySelector(href);
                     if (target && target.classList.contains('lazy-section')) loadSection(target);
+                    
                     if (window.innerWidth < 992 && menuToggle.classList.contains('show')) {
-                        e.preventDefault();
                         bsCollapse.hide();
                         menuToggle.addEventListener('hidden.bs.collapse', function handler() {
                             menuToggle.removeEventListener('hidden.bs.collapse', handler);
-                            if (target) target.scrollIntoView({ block: 'start' });
+                            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         });
+                    } else {
+                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 });
             });
