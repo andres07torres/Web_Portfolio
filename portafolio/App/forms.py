@@ -36,14 +36,13 @@ class ExperienciaForm(forms.ModelForm):
 class ProyectoForm(forms.ModelForm):
     class Meta:
         model = Proyecto
-        fields = ['titulo', 'descripcion', 'icono_class', 'link_github', 'link_despliegue', 'tecnologias', 'tecnologias_iconos', 'orden']
+        fields = ['titulo', 'descripcion', 'icono_class', 'link_github', 'link_despliegue', 'tecnologias_iconos', 'orden']
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'icono_class': forms.TextInput(attrs={'class': 'form-control'}),
             'link_github': forms.URLInput(attrs={'class': 'form-control'}),
             'link_despliegue': forms.URLInput(attrs={'class': 'form-control'}),
-            'tecnologias': forms.TextInput(attrs={'class': 'form-control'}),
             'orden': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 

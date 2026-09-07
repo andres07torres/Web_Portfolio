@@ -58,7 +58,6 @@ class Proyecto(models.Model):
     icono_class = models.CharField(max_length=100, help_text="Icono representativo. Ej: bi-translate")
     link_github = models.URLField(blank=True, null=True)
     link_despliegue = models.URLField(blank=True, null=True, help_text="Link del proyecto desplegado (Render, Vercel, etc)")
-    tecnologias = models.CharField(max_length=200, help_text="Lista separada por puntos o comas. Ej: AI • Python • Django", blank=True, null=True)
     tecnologias_iconos = models.ManyToManyField('Habilidad', blank=True, verbose_name="Tecnologías (Iconos de Habilidades)")
     orden = models.IntegerField(default=0)
 

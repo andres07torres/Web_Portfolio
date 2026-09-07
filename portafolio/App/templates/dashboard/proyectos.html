@@ -251,11 +251,6 @@
             <div class="p-icon-grid" id="pryMultiIconGrid" style="max-height: 180px;"></div>
           </div>
         </div>
-        <div class="col-12">
-          <label class="form-label">Otras Tecnologías (Texto plano)</label>
-          <input type="text" id="pryTecnologias" class="form-control" placeholder="Ej: Python • Django • PostgreSQL">
-          <div class="footer-text mt-1" style="font-size:.75rem;">Separa con • o comas.</div>
-        </div>
         <div class="col-md-6">
           <label class="form-label">Link GitHub</label>
           <input type="url" id="pryGithub" class="form-control" placeholder="https://github.com/...">
@@ -300,20 +295,12 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if p.tecnologias %}
-            <div class="pry-card-tags">
-                {% for tag in p.tecnologias.split %}
-                <span class="pry-tag">{{ tag }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
         </div>
         <div class="pry-card-actions">
             <button onclick="preparePryEdit(this)"
                     data-pk="{{ p.pk }}"
                     data-titulo="{{ p.titulo }}"
                     data-desc="{{ p.descripcion }}"
-                    data-tecs="{{ p.tecnologias }}"
                     data-tecs-classes="{% for t in p.tecnologias_iconos.all %}{{ t.icono_class }}{% if not forloop.last %},{% endif %}{% endfor %}"
                     data-github="{{ p.link_github }}"
                     data-despliegue="{{ p.link_despliegue }}"
@@ -470,7 +457,6 @@ function openPryModal() {
     document.getElementById('pryIconoVal').value = '';
     document.getElementById('pryTitulo').value   = '';
     document.getElementById('pryDesc').value     = '';
-    document.getElementById('pryTecnologias').value = '';
     document.getElementById('pryGithub').value   = '';
     document.getElementById('pryDespliegue').value = '';
     document.getElementById('pryOrden').value    = '0';
@@ -499,7 +485,6 @@ function preparePryEdit(btn) {
     const pk = btn.getAttribute('data-pk');
     const titulo = btn.getAttribute('data-titulo');
     const desc = btn.getAttribute('data-desc');
-    const tecs = btn.getAttribute('data-tecs');
     const tecsClasses = btn.getAttribute('data-tecs-classes') || '';
     const github = btn.getAttribute('data-github');
     const despliegue = btn.getAttribute('data-despliegue');
@@ -511,7 +496,6 @@ function preparePryEdit(btn) {
     document.getElementById('pryPk').value = pk;
     document.getElementById('pryTitulo').value = titulo;
     document.getElementById('pryDesc').value = desc;
-    document.getElementById('pryTecnologias').value = tecs;
     document.getElementById('pryGithub').value = github;
     document.getElementById('pryDespliegue').value = despliegue;
     document.getElementById('pryOrden').value = orden;
@@ -570,7 +554,6 @@ async function submitPry(e) {
     e.preventDefault();
     const titulo      = document.getElementById('pryTitulo').value.trim();
     const desc        = document.getElementById('pryDesc').value.trim();
-    const tecnologias = document.getElementById('pryTecnologias').value.trim();
     const github      = document.getElementById('pryGithub').value.trim();
     const despliegue   = document.getElementById('pryDespliegue').value.trim();
     const orden       = document.getElementById('pryOrden').value;
@@ -587,7 +570,7 @@ async function submitPry(e) {
     const fd = new FormData();
     fd.append('csrfmiddlewaretoken', PRY_CSRF);
     fd.append('titulo', titulo); fd.append('descripcion', desc);
-    fd.append('icono_class', icono); fd.append('tecnologias', tecnologias);
+    fd.append('icono_class', icono);
     fd.append('link_github', github);
     fd.append('link_despliegue', despliegue);
     fd.append('orden', orden);
@@ -629,18 +612,12 @@ function insertOrUpdatePryCard(data) {
                     ${data.tecnologias_iconos_html}
                 </div>
             ` : ''}
-            ${data.tecnologias ? `
-                <div class="pry-card-tags">
-                    ${data.tecnologias.split(/[ •,]+/).filter(t => t).map(t => `<span class="pry-tag">${t}</span>`).join('')}
-                </div>
-            ` : ''}
         </div>
         <div class="pry-card-actions">
             <button onclick="preparePryEdit(this)"
                     data-pk="${data.pk}"
                     data-titulo="${(data.titulo||'').replace(/"/g,'&quot;')}"
                     data-desc="${(data.descripcion||'').replace(/"/g,'&quot;')}"
-                    data-tecs="${(data.tecnologias||'').replace(/"/g,'&quot;')}"
                     data-tecs-classes="${data.tecnologias_classes||''}"
                     data-github="${(data.link_github||'').replace(/"/g,'&quot;')}"
                     data-despliegue="${(data.link_despliegue||'').replace(/"/g,'&quot;')}"

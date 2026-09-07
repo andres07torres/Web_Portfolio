@@ -462,7 +462,6 @@ def dashboard_proyecto_ajax(request, pk=None):
             'titulo': obj.titulo,
             'descripcion': obj.descripcion,
             'icono_class': obj.icono_class,
-            'tecnologias': obj.tecnologias,
             'tecnologias_ids': tecs_ids_str,
             'tecnologias_classes': tecs_classes_str,
             'tecnologias_iconos_html': tecs_html,

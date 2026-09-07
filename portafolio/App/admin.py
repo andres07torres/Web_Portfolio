@@ -17,6 +17,6 @@ class ExperienciaAdmin(admin.ModelAdmin):
 
 @admin.register(Proyecto)
 class ProyectoAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'tecnologias', 'orden')
+    list_display = ('titulo', 'orden')
     list_editable = ('orden',)
     filter_horizontal = ('tecnologias_iconos',)
