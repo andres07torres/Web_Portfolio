@@ -2,36 +2,77 @@ version: "3.8"
 
 services:
 
-  # ── Aplicación Django ────────────────────────────────────────
+  # ── Base de datos PostgreSQL ─────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: portafolio_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-gl1fztnpq4nxqt3xa6mrvxbuigqi3g1j}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - portafolio_net
+
+  # ── Administrador pgAdmin 4 ──────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: portafolio_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "${PGADMIN_PORT:-5051}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - portafolio_net
+
+  # ── Aplicación Django (Web) ──────────────────────────────────
   web:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: portafolio_web
     restart: always
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py collectstatic --noinput &&
-             python manage.py shell -c \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'Tigre6788')\" &&
-             gunicorn portafolio.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
     env_file:
       - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
     expose:
       - "8000"
     networks:
       - portafolio_net
-      - supabase_net
 
-  # ── Nginx (reverse proxy + archivos estáticos) ───────────────
+  # ── Nginx (Proxy inverso + Servidor de archivos estáticos) ───
   nginx:
     image: nginx:alpine
     container_name: portafolio_nginx
     restart: always
-    expose:
-      - "80"
+    ports:
+      - "${PORT:-80}:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_data:/app/staticfiles:ro
@@ -40,20 +81,15 @@ services:
       - web
     networks:
       - portafolio_net
-      - dokploy-network
 
 # ── Volúmenes persistentes ────────────────────────────────────
 volumes:
+  postgres_data:
+  pgadmin_data:
   media_data:
   static_data:
 
-# ── Redes ──────────────────────────────────────────────────────
+# ── Red interna ────────────────────────────────────────────────
 networks:
   portafolio_net:
     driver: bridge
-  dokploy-network:
-    external: true
-    name: dokploy-network
-  supabase_net:
-    external: true
-    name: supabase-supabase-hzjipt_default

@@ -1,13 +1,12 @@
 # ── Etapa 1: Builder ────────────────────────────────────────────
 FROM python:3.12-slim AS builder
 
-# Evita archivos .pyc y buffers en stdout
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Instala dependencias del sistema necesarias para psycopg2 y Pillow
+# Instala dependencias del sistema necesarias para compilar psycopg2 y Pillow
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
@@ -27,22 +26,26 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Dependencias runtime
+# Dependencias de ejecución
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     libjpeg62-turbo \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia paquetes Python desde el builder
+# Copia paquetes Python desde la etapa builder
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copia el código del proyecto (las variables se pasan por el entorno)
+# Copia el código de la aplicación Django
 COPY portafolio/ .
 
-# Crea los directorios necesarios
+# Copia el script de inicio y corrige saltos de línea (CRLF a LF)
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
+
+# Crea directorios para estáticos y media
 RUN mkdir -p /app/media /app/staticfiles
 
 EXPOSE 8000
 
-CMD ["gunicorn", "portafolio.wsgi:application", "--bind", "0.0.0.0:8000", "--timeout", "120"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

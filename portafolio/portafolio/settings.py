@@ -33,7 +33,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+allowed_hosts_env = os.getenv('ALLOWED_HOSTS', '*')
+if allowed_hosts_env == '*':
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_env.split(',') if h.strip()]
 
 # Render asigna el hostname automáticamente
 RENDER_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
@@ -46,7 +50,38 @@ if PORTFOLIO_DOMAIN not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(PORTFOLIO_DOMAIN)
 
 # CSRF trusted origins para Render y producción
-CSRF_TRUSTED_ORIGINS = [f'https://{h}' for h in ALLOWED_HOSTS if h]
+# Asegurar hosts locales para pruebas en Docker/local
+for local_host in ['localhost', '127.0.0.1']:
+    if local_host not in ALLOWED_HOSTS and '*' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(local_host)
+
+# CSRF trusted origins para producción, Render y Docker
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost',
+    'http://localhost:80',
+    'http://localhost:8000',
+    'http://127.0.0.1',
+    'http://127.0.0.1:80',
+    'http://127.0.0.1:8000',
+]
+
+if PORTFOLIO_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.extend([f'https://{PORTFOLIO_DOMAIN}', f'http://{PORTFOLIO_DOMAIN}'])
+
+if RENDER_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_HOSTNAME}')
+
+for host in ALLOWED_HOSTS:
+    if host and host != '*' and not host.startswith('.'):
+        https_origin = f'https://{host}'
+        http_origin = f'http://{host}'
+        if https_origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(https_origin)
+        if http_origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(http_origin)
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 
 
