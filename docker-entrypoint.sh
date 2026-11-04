@@ -75,11 +75,12 @@ except Exception as e:
 EOF
 fi
 
-PORT="${PORT:-8000}"
+# Gunicorn siempre escucha en 8000 para comunicarse internamente con Nginx
+DJANGO_PORT=8000
 
-echo "🚀 Iniciando Gunicorn en el puerto $PORT..."
+echo "🚀 Iniciando Gunicorn en el puerto $DJANGO_PORT..."
 exec gunicorn portafolio.wsgi:application \
-    --bind "0.0.0.0:$PORT" \
+    --bind "0.0.0.0:$DJANGO_PORT" \
     --workers 3 \
     --timeout 120 \
     --access-logfile - \
